@@ -1,12 +1,41 @@
 Font 0 Arial 16 bold
-Object Panel
+
+include dark.ui
+
+Clone Panel
 {
-    RectWH 100 100 400 200
-    Color RGB(25,36,47)
-    BorderColor RGB(55,66,77)
-    TextColor RGB(200,200,200)
-    Rounding 8
-    DrawBorder true
-    DrawClient false
+    Name what_is_this
+    RectWH 100 100 300 200
+    Rounding 4
+    Dock left|right 0.2 0 0.8 1
     Text 這是甚麼東西
+    Padding 10
+
+    Clone Button
+    {
+        Name click_me
+        RectWH 0 0 100 30
+        Anchor xy 1 1
+        Text 按我
+    }
+    
+    Clone Check
+    {
+        Name chk_me
+        RectWH 0 0 100 30
+        Offset -110 0
+        Anchor xy 1 1
+        Text 選我
+    }
+
+    Clone Check
+    {
+        Name chk_me
+        RectWH 0 0 100 30
+        Anchor xy 0 1
+        DrawBorder false
+        Text 否
+        CheckText 是 否
+    }
+
 }

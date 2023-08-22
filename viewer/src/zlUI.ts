@@ -134,6 +134,20 @@ Hint
     
 */
 
+export interface OnLoadable
+{
+    onload:any;
+    onerror:any;
+}
+
+export function LoadImage<T extends OnLoadable>(src:T):Promise<T>
+{
+    return new Promise((resolve, reject)=>{
+        src.onload=()=>resolve(src);
+        src.onerror=reject;
+    });
+}
+
 export function Panel(win:zlUIWin, text:string, child?:string):zlUIPanel
 {
     let obj:zlUIPanel=(child?win.GetUI(child):win) as zlUIPanel;
@@ -730,7 +744,7 @@ export class zlUIWin
                         this.ParseEnd();
                         return start;
                     default:
-                        this.ParseCmd(tok, toks);
+                        await this.ParseCmd(tok, toks);
                         break;
                     }
                 }
@@ -744,7 +758,7 @@ export class zlUIWin
 
     }
 
-    ParseCmd(name:string, toks:string[]):boolean 
+    async ParseCmd(name:string, toks:string[]):Promise<boolean>
     {
         switch(name) {
         case "name":
@@ -1420,7 +1434,7 @@ export class zlUIImage extends zlUIWin
         super(own)
         this._csid="Image";
     }
-    ParseCmd(name:string, toks:string[]):boolean 
+    async ParseCmd(name:string, toks:string[]):Promise<boolean>
     {
         switch(name) {
         case "image":
@@ -1430,7 +1444,7 @@ export class zlUIImage extends zlUIWin
             this.color=ParseColor(toks[1]);
             break;
         default:
-            return super.ParseCmd(name, toks);
+            return await super.ParseCmd(name, toks);
         }
         return true;
     }
@@ -1491,7 +1505,7 @@ export class zlUIPanel extends zlUIImage
         super(own)
         this._csid="Panel";
     }
-    ParseCmd(name:string, toks:string[]):boolean 
+    async ParseCmd(name:string, toks:string[]):Promise<boolean>
     {
         switch(name) {
         case "drawclient":
@@ -1554,7 +1568,7 @@ export class zlUIPanel extends zlUIImage
             };
             break;
         default:
-            return super.ParseCmd(name, toks);
+            return await super.ParseCmd(name, toks);
         }
         return true;
     }
@@ -1891,7 +1905,7 @@ export class zlUIEdit extends zlUIPanel
         this._csid="Edit";
     }
 
-    ParseCmd(name:string, toks:string[]):boolean 
+    async ParseCmd(name:string, toks:string[]):Promise<boolean>
     {
         switch(name) {
         case "password":
@@ -1902,7 +1916,7 @@ export class zlUIEdit extends zlUIPanel
             this.max_text_length=Number.parseInt(toks[1]);
             break;
         default:
-            return super.ParseCmd(name, toks);
+            return await super.ParseCmd(name, toks);
         }
         return true;
     }
@@ -1994,7 +2008,7 @@ export class zlUIButton extends zlUIPanel
         super(own)
         this._csid="Button";
     }
-    ParseCmd(name:string, toks:string[]):boolean 
+    async ParseCmd(name:string, toks:string[]):Promise<boolean>
     {
         switch(name) {
         case "boarddown":
@@ -2048,7 +2062,7 @@ export class zlUIButton extends zlUIPanel
             this.isPaintButton=ParseBool(toks[1]);
             break;
         default:
-            return super.ParseCmd(name, toks);
+            return await super.ParseCmd(name, toks);
         }
         return true;
     }
@@ -2174,7 +2188,7 @@ export class zlUICheck extends zlUIButton
         this.isPaintButton=false;
         this._csid="Check";
     }
-    ParseCmd(name:string, toks:string[]):boolean 
+    async ParseCmd(name:string, toks:string[]):Promise<boolean>
     {
         switch (name) {
         case "drawcheck":
@@ -2184,7 +2198,7 @@ export class zlUICheck extends zlUIButton
             this.check_text=[toks[1],toks[2]];
             break;
         default:
-            return super.ParseCmd(name, toks);
+            return await super.ParseCmd(name, toks);
         }
         return true;
     }
@@ -2288,7 +2302,7 @@ export class zlUICombo extends zlUIButton
         super(own);
         this._csid="Combo"
     }
-    ParseCmd(name: string, toks: string[]): boolean 
+    async ParseCmd(name:string, toks:string[]):Promise<boolean>
     {
         switch(name) {
         case "comboitems":
@@ -2298,7 +2312,7 @@ export class zlUICombo extends zlUIButton
             this.combo_value=Number.parseInt(toks[1]);
             break;
         default:
-            return super.ParseCmd(name, toks);
+            return await super.ParseCmd(name, toks);
         }
         return true;
     }
@@ -2411,7 +2425,7 @@ export class zlUISlider extends zlUIPanel
         this._csid="Slider";
         this.isClip=true;
     }
-    ParseCmd(name:string, toks:string[]):boolean 
+    async ParseCmd(name:string, toks:string[]):Promise<boolean>
     {
         switch(name) {
         case "direction":
@@ -2424,7 +2438,7 @@ export class zlUISlider extends zlUIPanel
             this.mouse_wheel_speed=Number.parseFloat(toks[1]);
             break;
         default:
-            return super.ParseCmd(name, toks);
+            return await super.ParseCmd(name, toks);
         }
         return true;
     }
@@ -2673,7 +2687,7 @@ export class zlUIImageText extends zlUIWin
         this._csid="ImageText";
     }
 
-    ParseCmd(name:string, toks:string[]):boolean 
+    async ParseCmd(name:string, toks:string[]):Promise<boolean>
     {
         switch(name) {
         case "imagelist":
@@ -2697,7 +2711,7 @@ export class zlUIImageText extends zlUIWin
             this.font_space=Number.parseInt(toks[1]);
             break;
         default:
-            return super.ParseCmd(name,toks);
+            return await super.ParseCmd(name,toks);
         }
         return true;
     }
@@ -2753,28 +2767,29 @@ export class zlTexturePack
         })
     }
 
-    Parse(lines:string[]):boolean
+    async Parse(lines:string[]):Promise<boolean>
     {
         for(let line of lines) {
             let toks:string[]=line.toLowerCase().split(/\s|\t/).filter(e=>e);
             if(toks.length>0)   {
-                this.ParseCmd(toks[0], toks);
+                await this.ParseCmd(toks[0], toks);
             }
         }
         return true;
     }
-    ParseCmd(name:string, toks:string[]):void 
+    async ParseCmd(name:string, toks:string[]):Promise<void>
     {
         switch(name) {
         case 'image':
             this.current=new ImGui_Impl.Texture;
             var image=new Image;
-            image.crossOrigin="anonymous";
-            image.src=this.owner.path + toks[1];
-            image.onload=()=>{
+            let loadproc=LoadImage(image).then(r=>{
                 this.current.Update(image);
                 console.log("image.onload", this.current);
-            }
+            });
+            image.crossOrigin="anonymous";
+            image.src=this.owner.path + toks[1];
+            await loadproc;
             this.textures.push(this.current);
             break;
         case 'subimage':
@@ -3486,7 +3501,7 @@ export class zlUIMgr extends zlUIWin
     on_notify: ((this: zlUIWin, obj: zlUIWin) => any) | null; 
     on_popup_closed: ((this: zlUIWin, obj: zlUIWin) => any) | null; 
 
-    ParseCmd(name:string, toks:string[]):boolean 
+    async ParseCmd(name:string, toks:string[]):Promise<boolean>
     {
         switch(name) {
         case "defaultborderwidth":
@@ -3499,16 +3514,10 @@ export class zlUIMgr extends zlUIWin
             this.default_panel_color=ParseColor(toks[1]);
             break;
         case "loadpackimage":
-            if(!this.image_pack) {
-                this.image_pack=[]
-            }
-            this.image_pack.push(toks[1]);
+            await this.LoadTexturePack(toks[1], this.path);
             break;
         case "include":
-            if(!this.include) {
-                this.include=[]
-            }
-            this.include.push(toks[1]);
+            await this.Load(toks[1], this.path);
             break;
         case "defaultcombomenu":
             this.default_combo_menu=this.GetUI(toks[1]).Clone() as zlUISlider;
@@ -3541,32 +3550,9 @@ export class zlUIMgr extends zlUIWin
         }
     }
 
-    async Parse(lines: string[], start: number): Promise<number> {
-        start=await super.Parse(lines, start);
-
-        if(this.image_pack) {
-            let image_pack=this.image_pack;
-            this.image_pack=null;
-            for(let file of image_pack) {
-                await this.LoadTexturePack(file, this.path);
-            }
-        }
-        if(this.include) {
-            let include=this.include;
-            this.include=null;
-            for(let inc of include) {
-                let r=await this.Load(inc, this.path);
-                if(!r) {
-                    console.log("include " + inc + " failed");
-                }
-            }
-        }
-        return start;
-    }
-
     async Load(file:string, path:string):Promise<boolean>
     {
-        console.log("zlUIMgr Load "+ file);
+        console.log("zlUIMgr Load "+ path + file);
         this.path=path;
         this.Name="Root";
         this.isCalRect=true;
@@ -3577,8 +3563,7 @@ export class zlUIMgr extends zlUIWin
             console.log("Load " + path + file + " failed");
             return "";
         });        
-        let r=await this.Parse(t.split(/\r\n|\n/), 0) > 0;
-        return r;
+        return await this.Parse(t.split(/\r\n|\n/), 0) > 0;
     }
     async LoadTexturePack(file:string, path:string):Promise<boolean>
     {
@@ -3586,14 +3571,13 @@ export class zlUIMgr extends zlUIWin
         if(!this.texture)   {
             this.texture=new zlTexturePack(this);
         }
-        return fetch(path + file).then(r=>{
+        let t = await fetch(path + file).then(r=>{
             return r.text();
-        }).then(t=>{
-            return this.texture.Parse(t.split(/\r\n|\n/));
         }).catch(r=>{
             console.log("LoadTexturePack", r);
-            return false;
+            return "";
         });
+        return await this.texture.Parse(t.split(/\r\n|\n/));
     }
 
     Create(name:string):zlUIWin

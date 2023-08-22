@@ -1,23 +1,51 @@
-Object Button
-{
-    Name Button
-    RectWH 100 100 150 30
-    Color RGB(25,36,47)
-    ColorHover RGB(45,56,67)
-    ColorDown RGB(55,66,77)
-    BorderColor RGB(55,66,77)
-    TextColor RGB(200,200,200)
-    TextColorHover RGB(220,220,220)
-    Rounding 4
-    
-    DrawBorder true
-    Text 按我
 
-}
-Clone[10] Button
+include dark.ui
+
+//
+
+Clone Panel
 {
-    RectWH 100 150 120 30
-    +Y 40
+    Name pnl_login
+    RectWH 0 0 300 200
+    Anchor xy 0.5 0.4
+    Padding 10
+    Rounding 10
+
+    TextAnchor xy 0.5 0
+    Text Login
+
+    Clone Text
+    {
+        Name txt_user
+        RectWH 10 60 100 30
+        TextAlignW right
+        Text User
+    }
+    Clone txt_user
+    {
+        Name txt_pw
+        Y 100
+        Text Password
+    }
+    Clone Edit
+    {
+        Name ed_user
+        RectWH 130 60 150 30
+        Rounding 5
+    }
+    Clone ed_user
+    {
+        Name ed_pw
+        Y 100
+        Password *
+    }
+
+    Clone Button
+    {
+        Name btn_ok
+        RectWH 10 10 100 30
+        Anchor xy 0.5 1
+        Text OK 
+    }
 }
 
-include 1.ui

@@ -10,45 +10,111 @@
         "object": {
             "patterns": [
                 { 
-                    "match": "Object|Clone",
+                    "match": "Object|Clone|Param|TrackGroup|Track",
                     "name": "keyword.type"
                 },
                 { "include": "#object_type"},
-                { "include": "#paren-object" }
+                { "include": "#parameter_win"},
+                { "include": "#parameter"},
+                { "include": "#paren-object" },
+                { "include": "#comment" }
             ]
         },
         "object_type": {
             "patterns": [
                 {
-                    "match": "\\b(Win|Panel|Image|Button|Check|Combo|Slider|ImageText)\\b",
-                    "name": "variable"
+                    "match": "\\b(Win|Panel|Image|Button|Check|Combo|Edit|Slider|ImageText)\\b",
+                    "name": "variable.object_type"
                 }
             ]
         },
         "global_function":{
             "patterns":[
                 {
-                    "match": "\\b(Font)\\b",
-                    "name": "variable"
+                    "match": "\\b(Font|include|DefaultBorderWidth|DefaultScreenSize|DefaultPanelColor|LoadPackImage|DefaultComboMenu|DefaultComboItem|MergeFont)\\b",
+                    "name": "variable.global_function"
                 }
             ]
         },
-        "function":{
+        "parameter_win":{
             "patterns":[
                 {
-                    "match": "\\b(RectWH|Color|ColorHover|BorderColor|TextColor|Font|Text|Rounding|DrawBorder|DrawClient)\\b",
-                    "name": "variable"
+                    "match":"\\b(Name|RectWH|Top|Y|Left|X|Width|W|Height|H|Align|Visible|Notify|Drag|Autosize|AutoHeight|Padding|Anchor|Dock|Offset|Clip|Arrange|Hint|Mergin)\\b",
+                    "name":"constant.numeric.win"
                 },
-                { "include": "#parameter"}
+                {
+                    "match":"\\b(Image|Color)\\b",
+                    "name":"constant.numeric.image"
+                },
+                {
+                    "match":"\\b(DrawClient|DrawBorder|DrawWidth|BorderColor|HoverColor|Rounding|RoundingCorner|Text|TextAlignW|TextAlignH|TextColor|TextColorHover|Font|Board|Multiline|TextAnchor|TextOffset)\\b",
+                    "name":"constant.numeric.panel"
+                },
+                {
+                    "match":"\\b(Password|MaxLength)\\b",
+                    "name":"constant.numeric.edit"
+                },
+                {
+                    "match":"\\b(BoardDown|Board|BoardUp|BoardHover|Color|ColorDown|ColorHover|ColorDisable|TextColor|TextColorDown|TextColorUp|Image|ImageDown|ImageHover|DrawButton)\\b",
+                    "name":"constant.numeric.button"
+                },
+                {
+                    "match":"\\b(DrawCheck|CheckText)\\b",
+                    "name":"constant.numeric.check"
+                },
+                {
+                    "match":"\\b(ComboItems|ComboValue)\\b",
+                    "name":"constant.numeric.combo"
+                },
+                {
+                    "match":"\\b(Direction|ItemMode|MouseWheelSpeed)\\b",
+                    "name":"constant.numeric.slider"
+                },
+                {
+                    "match":"\\b(ImageList|ImageW|ImageH|Text|Ascii|TextAlignW|TextAlignH|FontSpace)\\b",
+                    "name":"constant.numeric.imagetext"
+                }
             ]
         },
         "parameter":{
             "patterns":[
                 {
-                    "comment":"Color Parameter",
-                    "match": "\\b(RGB|RGBA|true|false)\\b",
-                    "name": "keyword.control"
+                    "match": "\\b(RGB|RGBA)\\b",
+                    "name": "keyword.control.color"
+                },
+                {
+                    "match": "\\b(true|false|yes|no)\\b",
+                    "name": "keyword.control.boolean"
+                },
+                {
+                    "match": "\\b(none|left|top|right|down|center|centerW|centerH|centerTop|centerDown|centerLeft|centerRight|rightTop|rightDown|leftTop|leftDown|parentWidth|parentHeight|textWidth|textHeight|textSize)\\b",
+                    "name": "keyword.control.align"
+                },
+                {
+                    "match": "\\b(width|height|all)\\b",
+                    "name": "keyword.control.autosize"
+                },
+                {
+                    "match": "\\b(horizon|vertical|both)\\b",
+                    "name": "keyword.control.slidertype"
+                },
+                {
+                    "match": "\\b(none|topLeft|topRight|downLeft|downRight|top|down|left|right|all)\\b",
+                    "name": "keyword.control.corner"
+                },
+                {
+                    "match": "\\b(x|y|xy|all)\\b",
+                    "name": "keyword.control.anchor"
+                },
+                {
+                    "match": "\\b(left|top|right|down|bottom|all)\\b",
+                    "name": "keyword.control.dock"
+                },
+                {
+                    "match": "\\b(item|content|horizon|vertical)\\b",
+                    "name": "keyword.control.arrange"
                 }
+
             ]
         },
         "comments":{
@@ -56,7 +122,7 @@
                 {
                     "begin": "//",
                     "end":"$",
-                    "name": "storage.type.ui"
+                    "name": "comment.line"
                 },
                 {
                     "begin":"/\\*",
@@ -86,6 +152,18 @@
                 { "include": "#object" },
                 { "include": "#function"}
             ]
-        }
+        },
+        "paren-expression": {
+            "begin": "\\(",
+            "end": "\\)",
+            "beginCaptures": {
+                "0": { "name": "punctuation.paren.open" }
+            },
+            "endCaptures": {
+                "0": { "name": "punctuation.paren.close" }
+            },
+            "name": "expression.group",
+            "patterns": [{ "include": "#expression" }]
+        }        
     }    
 }

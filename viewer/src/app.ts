@@ -35,7 +35,7 @@ export class App
         }
 
     }
-    onMessage(msg:any)
+    async onMessage(msg:any)
     {
         console.log(msg);
         switch(msg.cmd) {
@@ -46,7 +46,7 @@ export class App
                     this.ui.path+="/";
                 }
                 this.ui.pChild=[];
-                this.ui.Parse(msg.document.split(/\r\n|\n/), 0);
+                await this.ui.Parse(msg.document.split(/\r\n|\n/), 0);
                 console.log(this.ui);
             }
             break;
