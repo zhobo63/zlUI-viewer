@@ -1,0 +1,91 @@
+{
+    "scopeName": "source.ui",
+    "name": "zlUI",
+    "patterns": [
+        { "include": "#global_function" }, 
+        { "include": "#comment" },
+        { "include": "#object" }
+    ],
+    "repository": {
+        "object": {
+            "patterns": [
+                { 
+                    "match": "Object|Clone",
+                    "name": "keyword.type"
+                },
+                { "include": "#object_type"},
+                { "include": "#paren-object" }
+            ]
+        },
+        "object_type": {
+            "patterns": [
+                {
+                    "match": "\\b(Win|Panel|Image|Button|Check|Combo|Slider|ImageText)\\b",
+                    "name": "variable"
+                }
+            ]
+        },
+        "global_function":{
+            "patterns":[
+                {
+                    "match": "\\b(Font)\\b",
+                    "name": "variable"
+                }
+            ]
+        },
+        "function":{
+            "patterns":[
+                {
+                    "match": "\\b(RectWH|Color|ColorHover|BorderColor|TextColor|Font|Text|Rounding|DrawBorder|DrawClient)\\b",
+                    "name": "variable"
+                },
+                { "include": "#parameter"}
+            ]
+        },
+        "parameter":{
+            "patterns":[
+                {
+                    "comment":"Color Parameter",
+                    "match": "\\b(RGB|RGBA|true|false)\\b",
+                    "name": "keyword.control"
+                }
+            ]
+        },
+        "comments":{
+            "patterns":[
+                {
+                    "begin": "//",
+                    "end":"$",
+                    "name": "storage.type.ui"
+                },
+                {
+                    "begin":"/\\*",
+                    "end":"\\*/",
+                    "beginCaptures": {
+                        "0": { "name": "punctuation.paren.open" }
+                    },
+                    "endCaptures": {
+                        "0": { "name": "punctuation.paren.close" }
+                    },
+                    "name": "comment.block"
+                }
+            ]
+        },
+        "paren-object": {
+            "begin": "\\{",
+            "end": "\\}",
+            "beginCaptures": {
+                "0": { "name": "punctuation.paren.open" }
+            },
+            "endCaptures": {
+                "0": { "name": "punctuation.paren.close" }
+            },
+            "name": "object.group",
+
+            "patterns": [
+                { "include": "#object" },
+                { "include": "#function"}
+            ]
+        }
+    }    
+}

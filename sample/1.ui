@@ -1,0 +1,12 @@
+Font 0 Arial 16 bold
+Object Panel
+{
+    RectWH 100 100 400 200
+    Color RGB(25,36,47)
+    BorderColor RGB(55,66,77)
+    TextColor RGB(200,200,200)
+    Rounding 8
+    DrawBorder true
+    DrawClient false
+    Text 這是甚麼東西
+}
