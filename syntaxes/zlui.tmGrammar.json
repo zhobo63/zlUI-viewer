@@ -13,6 +13,10 @@
                     "match": "Object|Clone|Param|TrackGroup|Track",
                     "name": "keyword.type"
                 },
+                { 
+                    "match": "\\b(if|ifnot)\\b",
+                    "name": "keyword.type"
+                },
                 { "include": "#object_type"},
                 { "include": "#parameter_win"},
                 { "include": "#parameter"},
@@ -31,7 +35,7 @@
         "global_function":{
             "patterns":[
                 {
-                    "match": "\\b(Font|include|DefaultBorderWidth|DefaultScreenSize|DefaultPanelColor|LoadPackImage|DefaultComboMenu|DefaultComboItem|MergeFont)\\b",
+                    "match": "\\b(Font|include|DefaultBorderWidth|DefaultScreenSize|DefaultPanelColor|LoadPackImage|DefaultComboMenu|DefaultComboItem|MergeFont|CreateFont)\\b",
                     "name": "variable.global_function"
                 }
             ]
@@ -47,7 +51,7 @@
                     "name":"constant.numeric.image"
                 },
                 {
-                    "match":"\\b(DrawClient|DrawBorder|DrawWidth|BorderColor|HoverColor|Rounding|RoundingCorner|Text|TextAlignW|TextAlignH|TextColor|TextColorHover|Font|Board|Multiline|TextAnchor|TextOffset)\\b",
+                    "match":"\\b(DrawClient|DrawBorder|DrawWidth|BorderColor|HoverColor|Rounding|RoundingCorner|Text|TextAlignW|TextAlignH|TextColor|TextColorHover|Font|Board|Multiline|TextAnchor|TextOffset|BorderWidth)\\b",
                     "name":"constant.numeric.panel"
                 },
                 {

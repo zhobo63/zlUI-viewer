@@ -10,10 +10,26 @@ Preview zlUI, default file ext: *.ui
 Object Panel
 {
 
-    # child object
+    // child object
     Object Button
     {
-        
+        Name btn_ok   
+
+        Object Panel
+        {
+            Name pnl_icon
+        }
+    }
+
+    // clone previous object by name
+    Clone btn_ok
+    {
+
+        // set child parameter by name
+        Param pnl_icon
+        {
+
+        }
     }
 }
 ```
@@ -21,6 +37,16 @@ Object Panel
 * Object Type
 
 Win
+
+```
+//create
+
+Object Win
+{
+    //parameter
+}
+
+```
 
 Image extend Win
 

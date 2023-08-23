@@ -1,6 +1,6 @@
 Font 0 Arial 16 bold
 
-include dark.ui
+ifnot DarkTheme include dark.ui
 
 Clone Panel
 {

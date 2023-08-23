@@ -5,7 +5,6 @@ import { EType, GetInput, Input } from "@zhobo63/imgui-ts/src/input";
 /*
 TODO
 zlUIImageText
-zlUICombo
 TrackGroup
 Arrange: Item mode
 TabIndex
@@ -860,6 +859,16 @@ export class zlUIWin
         case "margin":
             this.margin.x=Number.parseInt(toks[1]);
             this.margin.y=Number.parseInt(toks[2]);
+            break;
+        case "if":
+            if(this._owner.GetUI(toks[1])) {
+                await this.ParseCmd(toks[2], toks.slice(2));
+            }
+            break;
+        case "ifnot":
+            if(!this._owner.GetUI(toks[1])) {
+                await this.ParseCmd(toks[2], toks.slice(2));
+            }
             break;
         default:
             console.log("zlUIWin " + this.Name + " unknow param " + name);
@@ -3535,6 +3544,12 @@ export class zlUIMgr extends zlUIWin
             let font=ImGui.CreateFont(toks[4].replace("\\s"," "), Number.parseInt(toks[5]), toks[6]);
             font.AddFontRange(ParseText(toks[2]).charCodeAt(0), ParseText(toks[3]).charCodeAt(0));
             this.fonts[id].MergeFont(font);
+            break; }
+        case "createfont": {
+            let url=this.path+toks[2];
+            let fontface=new FontFace(toks[1], `url(${url})`);
+            await fontface.load().then(r=>{console.log("FontFace load",r)})
+            document.fonts.add(fontface);
             break; }
         default:
             return super.ParseCmd(name, toks);

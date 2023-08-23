@@ -47,6 +47,7 @@ export class App
                 }
                 this.ui.pChild=[];
                 await this.ui.Parse(msg.document.split(/\r\n|\n/), 0);
+                this.ui.SetCalRect();
                 console.log(this.ui);
             }
             break;
