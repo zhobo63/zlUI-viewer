@@ -1,8 +1,11 @@
-
 // Dark theme
 
+Font 0 Arial 16 bold
+Font 1 Verdana 26 bold
+MergeFont 0 \uf000 \uffff Fontawesome 16 normal
+
 /*
-	this is dark theme
+
 */
 
 Object Win
@@ -111,7 +114,7 @@ Object Win
 		ColorDown RGBA(77,81,90,255)
 		BorderColor RGBA(57,61,70,255)
 		TextColor RGBA(255,255,255,255)
-		Dock Left|Right 0 0 1 1
+		Dock left|right 0 0 1 1
 	}
 	
 	Object Check
@@ -125,7 +128,7 @@ Object Win
 		TextColor RGB(200,200,200)
 		TextColorHover RGB(255,255,255)
 		Padding 10
-		TextAlignW Left
+		TextAlignW left
 		Rounding 8
 		RoundingCorner top
 		DrawBorder false
@@ -163,7 +166,7 @@ Object Win
 		BorderWidth 1
 		DrawBorder true
 		DrawClient false
-		TextAnchor X|Y 0 0.5
+		TextAnchor xy 0 0.5
 		Text checkbox
 	}
 	Object Combo
@@ -185,14 +188,14 @@ Object Win
 		DrawBorder false
 		DrawClient false
 		Notify false
-		Dock Left|Right 0 0 1 1
+		Dock left|right 0 0 1 1
 		
 		Clone Text
 		{
 			Name label_name
 			Notify false
-			Dock All 0 0 0.5 1
-			TextAnchor X|Y 1 0.5 
+			Dock all 0 0 0.5 1
+			TextAnchor xy 1 0.5 
 			Text label			
 		}
 	}
@@ -202,8 +205,8 @@ Object Win
 		Clone Edit
 		{
 			Name label_value
-			Dock All 0.5 0 1 1
-			TextAnchor X|Y 0 0.5
+			Dock all 0.5 0 1 1
+			TextAnchor xy 0 0.5
 			TextOffset 5 0
 			Text value
 		}
@@ -214,11 +217,11 @@ Object Win
 		Clone Check
 		{
 			Name label_value
-			Dock All 0.5 0 1 1
-			TextAnchor X|Y 0 0.5
+			Dock all 0.5 0 1 1
+			TextAnchor xy 0 0.5
 			TextOffset 5 0
 			DrawBorder false
-			Text 
+			Text
 		}
 	}
 }

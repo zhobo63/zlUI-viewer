@@ -1,7 +1,6 @@
 import { ImGui, ImGui_Impl } from "@zhobo63/imgui-ts";
 import { ImDrawList, ImVec2 } from "@zhobo63/imgui-ts/src/imgui";
 import { EType, GetInput, Input } from "@zhobo63/imgui-ts/src/input";
-import { isContext } from "vm";
 
 /*
 TODO
@@ -662,16 +661,17 @@ export class zlUIWin
     on_change: ((this: zlUIWin, text: string) => any) | null; 
 
     async Parse(lines:string[], start:number):Promise<number>
-    {
+    {        
         let isComment=false;
         for(;start<lines.length;start++) {
             let line=lines[start];
             let toks:string[]=line.toLowerCase().split(/\s|\t/).filter(e=>e);
+            
             if(toks.length>0)   {
                 let tok=toks[0];
                 let next=line.toLowerCase().indexOf(tok);
                 toks.push(line.slice(next+1+tok.length));
-                if(tok.startsWith('//')||tok.startsWith('#')||isComment)  {
+                if(tok.startsWith('//')||tok.startsWith('#'))  {
                 }
                 else if(tok.startsWith("/*"))
                 {
@@ -680,6 +680,9 @@ export class zlUIWin
                 else if(tok.startsWith("*/"))
                 {
                     isComment=false;
+                }
+                else if(isComment)
+                {
                 }
                 else if(tok.startsWith("object["))
                 {

@@ -1,5 +1,5 @@
 
-include dark.ui
+ifnot DarkTheme include dark.ui
 
 //
 

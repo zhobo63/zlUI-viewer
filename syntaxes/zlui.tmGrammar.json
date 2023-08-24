@@ -15,7 +15,7 @@
                 },
                 { 
                     "match": "\\b(if|ifnot)\\b",
-                    "name": "keyword.type"
+                    "name": "keyword.control.if"
                 },
                 { "include": "#object_type"},
                 { "include": "#parameter_win"},
@@ -118,6 +118,10 @@
                 {
                     "match": "\\b(item|content|horizon|vertical)\\b",
                     "name": "keyword.control.arrange"
+                },
+                {
+                    "match": "\\\\u([\\d\\w]{4})|\\\\s|\\\\n",
+                    "name": "support.class"
                 }
 
             ]
@@ -125,12 +129,7 @@
         "comment":{
             "patterns":[
                 {
-                    "begin": "#",
-                    "end":"$",
-                    "name": "comment.line"
-                },
-                {
-                    "begin": "//",
+                    "begin": "//|#",
                     "end":"$",
                     "name": "comment.line"
                 },
