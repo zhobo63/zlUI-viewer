@@ -1,5 +1,9 @@
 
-//Dark theme
+// Dark theme
+
+/*
+	this is dark theme
+*/
 
 Object Win
 {
@@ -68,7 +72,7 @@ Object Win
 		Name Edit
 		
 		Color RGBA(23,26,29,255)
-		ColorHover RGBA(57,61,70,255)
+#		ColorHover RGBA(57,61,70,255)
 #		ColorDown RGBA(77,81,90,255)
 		BorderColor RGBA(57,61,70,255)
 		TextColor RGBA(255,255,255,255)

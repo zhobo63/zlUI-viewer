@@ -1,6 +1,7 @@
 import { ImGui, ImGui_Impl } from "@zhobo63/imgui-ts";
 import { ImDrawList, ImVec2 } from "@zhobo63/imgui-ts/src/imgui";
 import { EType, GetInput, Input } from "@zhobo63/imgui-ts/src/input";
+import { isContext } from "vm";
 
 /*
 TODO
@@ -193,6 +194,23 @@ export function Inside(pos:ImGui.ImVec2, min:ImGui.ImVec2, max:ImGui.ImVec2):boo
    return (pos.x>=min.x&&pos.x<=max.x&&pos.y>=min.y&&pos.y<=max.y)?true:false;
 }
 
+function toColorHex(c:Vec4):number
+{
+    let r=Math.floor(c.x*255);
+    let g=Math.floor(c.y*255);
+    let b=Math.floor(c.z*255);
+    let a=Math.floor(c.w*255);
+    return (a<<24)|(b<<16)|(g<<8)|r;
+}
+function fromColorHex(c:number):Vec4
+{
+    let r=(c&0x000000ff)/255;
+    let g=((c&0x0000ff00)>>8)/255;
+    let b=((c&0x00ff0000)>>16)/255;
+    let a=((c&0xff000000)>>24)/255;
+    return {x:r,y:g,z:b,w:a};
+}
+
 function ParseBool(tok:string):boolean
 {
     let b:boolean=true;
@@ -218,8 +236,8 @@ function ParseText(s:string):string
     let r=/\\u([\d\w]{4})/gi;
     s = s.replace(r, function (match, grp) {
         return String.fromCharCode(parseInt(grp, 16)); } );    
-    s=s.replace("\\n", "\n");
-    s=s.replace("\\s"," ");
+    s=s.replace(/\\n/g, "\n");
+    s=s.replace(/\\s/g," ");
     return s;
 }
 
@@ -645,6 +663,7 @@ export class zlUIWin
 
     async Parse(lines:string[], start:number):Promise<number>
     {
+        let isComment=false;
         for(;start<lines.length;start++) {
             let line=lines[start];
             let toks:string[]=line.toLowerCase().split(/\s|\t/).filter(e=>e);
@@ -652,7 +671,15 @@ export class zlUIWin
                 let tok=toks[0];
                 let next=line.toLowerCase().indexOf(tok);
                 toks.push(line.slice(next+1+tok.length));
-                if(tok.startsWith('//')||tok.startsWith('#'))  {
+                if(tok.startsWith('//')||tok.startsWith('#')||isComment)  {
+                }
+                else if(tok.startsWith("/*"))
+                {
+                    isComment=true;
+                }
+                else if(tok.startsWith("*/"))
+                {
+                    isComment=false;
                 }
                 else if(tok.startsWith("object["))
                 {
@@ -1393,8 +1420,10 @@ export class zlUIWin
         }
         return false;
     }
-    SetText(text:string) {}
-    SetImage(name:string) {}
+    set Text(text:string) {}
+    set Image(name:string) {}
+    set Color(color:Vec4) {}
+    get Color():Vec4 {return {x:1,y:1,z:1,w:1}}
 
     Name:string;
     isCalRect:boolean=false;
@@ -1502,6 +1531,10 @@ export class zlUIImage extends zlUIWin
         }
         super.Paint(drawlist, parent);
     }
+
+    set Image(name:string) {this.SetImage(name);}
+    set Color(c:Vec4) {this.color=toColorHex(c);}
+    get Color():Vec4 {return fromColorHex(this.color);}
 
     image:TexturePack;
     color:number=0xffffffff;
@@ -1809,14 +1842,17 @@ export class zlUIPanel extends zlUIImage
             this._textSize=size;            
             switch(this.align) {
             case Align.TextWidth:
-                this.w=size.x;
+                this.w=size.x+this.padding+this.padding;
+                this.SetCalRect();
                 break;
             case Align.TextHeight:
-                this.h=size.y;
+                this.h=size.y+this.padding+this.padding;
+                this.SetCalRect();
                 break;
             case Align.TextSize:
-                this.w=size.x;
-                this.h=size.y;
+                this.w=size.x+this.padding+this.padding;
+                this.h=size.y+this.padding+this.padding;
+                this.SetCalRect();
                 break;
             }
             switch(this.textAlignW)  {
@@ -1877,6 +1913,8 @@ export class zlUIPanel extends zlUIImage
             }
         }
     }
+
+    set Text(text:string) {this.SetText(text);}
 
     text:string="";
     textColor:number=0xff000000;
@@ -2874,6 +2912,14 @@ enum ETrackCmd
     Text,
 }
 
+interface InitData
+{
+    pos?:Vec2;
+    wh?:Vec2;
+    color?:Vec4;
+    alpha?:number;
+}
+
 interface ITrackCmd
 {
     cmd:ETrackCmd;
@@ -2898,7 +2944,7 @@ interface ITrackCmd
     count?:number;
 
     isInit?:boolean;
-
+    initData?:InitData;
 }
 
 const TimeUint=1/30;
@@ -2978,6 +3024,16 @@ export class zlTrack
             })
             break;
         case "move":
+            time2=Number.parseFloat(toks[2])*TimeUint;
+            this.cmd.push({
+                cmd:ETrackCmd.Move,
+                time_from:time1,
+                time_to:time2,
+                pos: {
+                    x:Number.parseFloat(toks[3]),
+                    y:Number.parseFloat(toks[4]),
+                },
+            });            
             break;
         case "movelerp":
             time2=Number.parseFloat(toks[2])*TimeUint;
@@ -3007,7 +3063,16 @@ export class zlTrack
             });        
             break;
         case "movex":
-            console.log("TODO", name);
+            time2=Number.parseFloat(toks[2])*TimeUint;
+            this.cmd.push({
+                cmd:ETrackCmd.MoveX,
+                time_from:time1,
+                time_to:time2,
+                pos: {
+                    x:Number.parseFloat(toks[3]),
+                    y:0,
+                },
+            });            
             break;
         case "movexlerp":
             time2=Number.parseFloat(toks[2])*TimeUint;
@@ -3034,6 +3099,16 @@ export class zlTrack
             });        
             break;
         case "movey":
+            time2=Number.parseFloat(toks[2])*TimeUint;
+            this.cmd.push({
+                cmd:ETrackCmd.MoveY,
+                time_from:time1,
+                time_to:time2,
+                pos: {
+                    x:0,
+                    y:Number.parseFloat(toks[3]),
+                },
+            });            
             break;
         case "moveylerp":
             time2=Number.parseFloat(toks[2])*TimeUint;
@@ -3066,10 +3141,17 @@ export class zlTrack
                 cmd:ETrackCmd.SetAlpha,
                 time_from:time1,
                 time_to:time1,
-                color:{x:0,y:0,z:0,w:Number.parseFloat(toks[2])/255}
+                alpha:Number.parseFloat(toks[2])/255
             });        
             break;
         case "alpha":
+            time2=Number.parseFloat(toks[2])*TimeUint;
+            this.cmd.push({
+                cmd:ETrackCmd.Alpha,
+                time_from:time1,
+                time_to:time2,
+                alpha:Number.parseFloat(toks[3])/255
+            });            
             break;
         case "alphalerp":
             time2=Number.parseFloat(toks[2])*TimeUint;
@@ -3077,10 +3159,7 @@ export class zlTrack
                 cmd:ETrackCmd.AlphaLerp,
                 time_from:time1,
                 time_to:time2,
-                color: {
-                    x:0,y:0,z:0,
-                    w:Number.parseFloat(toks[3])
-                },
+                alpha:Number.parseFloat(toks[3]),
                 speed:Number.parseFloat(toks[4]),
             });
             break;
@@ -3121,6 +3200,16 @@ export class zlTrack
         case "colorlerp":
             break;
         case "width":
+            time2=Number.parseFloat(toks[2])*TimeUint;
+            this.cmd.push({
+                cmd:ETrackCmd.Width,
+                time_from:time1,
+                time_to:time2,
+                wh: {
+                    x:Number.parseFloat(toks[3]),
+                    y:0,
+                },
+            });            
             break;
         case "widthlerp":
             time2=Number.parseFloat(toks[2])*TimeUint;
@@ -3136,6 +3225,16 @@ export class zlTrack
             });
             break;
         case "height":
+            time2=Number.parseFloat(toks[2])*TimeUint;
+            this.cmd.push({
+                cmd:ETrackCmd.Height,
+                time_from:time1,
+                time_to:time2,
+                wh: {
+                    x:0,
+                    y:Number.parseFloat(toks[3]),
+                },
+            });            
             break;
         case "heightlerp":
             time2=Number.parseFloat(toks[2])*TimeUint;
@@ -3242,6 +3341,7 @@ export class zlTrack
             if(this.time<cmd.time_from)
                 continue;
             let obj=this.object;
+            let t=cmd.period>0?(this.time-cmd.time_from)/cmd.period:0;
             switch(cmd.cmd) {
             case ETrackCmd.SetPos:
                 obj.x=cmd.pos.x;
@@ -3263,6 +3363,15 @@ export class zlTrack
                 obj.h=cmd.wh.y;
                 obj.SetCalRect();
                 break;
+            case ETrackCmd.Move:
+                if(!cmd.isInit) {
+                    cmd.isInit=true;
+                    cmd.initData={pos:{x:obj.x,y:obj.y}}
+                }
+                obj.x=cmd.initData.pos.x+(cmd.pos.x-cmd.initData.pos.x)*t;
+                obj.y=cmd.initData.pos.y+(cmd.pos.y-cmd.initData.pos.y)*t;
+                obj.SetCalRect();
+                break;
             case ETrackCmd.MoveLerp:
                 obj.x+=(cmd.pos.x-obj.x)*cmd.speed*ti;
                 obj.y+=(cmd.pos.y-obj.y)*cmd.speed*ti;
@@ -3270,6 +3379,14 @@ export class zlTrack
                 break;
             case ETrackCmd.SetX:
                 obj.x=cmd.pos.x;
+                obj.SetCalRect();
+                break;
+            case ETrackCmd.MoveX:
+                if(!cmd.isInit) {
+                    cmd.isInit=true;
+                    cmd.initData={pos:{x:obj.x,y:obj.y}}
+                }
+                obj.x=cmd.initData.pos.x+(cmd.pos.x-cmd.initData.pos.x)*t;
                 obj.SetCalRect();
                 break;
             case ETrackCmd.MoveXLerp:
@@ -3280,18 +3397,33 @@ export class zlTrack
                 obj.y=cmd.pos.y;
                 obj.SetCalRect();
                 break;
+            case ETrackCmd.MoveY:
+                if(!cmd.isInit) {
+                    cmd.isInit=true;
+                    cmd.initData={pos:{x:obj.x,y:obj.y}}
+                }
+                obj.y=cmd.initData.pos.y+(cmd.pos.y-cmd.initData.pos.y)*t;
+                obj.SetCalRect();
+                break;
             case ETrackCmd.MoveYLerp:
                 obj.y+=(cmd.pos.y-obj.y)*cmd.speed*ti;
                 obj.SetCalRect();
                 break;
             case ETrackCmd.Image:
-                obj.SetImage(cmd.image);
+                obj.Image=cmd.image;
                 break;
             case ETrackCmd.SetAlpha:
-                obj.alpha=cmd.color.w;
+                obj.alpha=cmd.alpha;
+                break;
+            case ETrackCmd.Alpha:
+                if(!cmd.isInit) {
+                    cmd.isInit=true;
+                    cmd.initData={alpha:obj.alpha}
+                }
+                obj.alpha=cmd.initData.alpha+(cmd.alpha-cmd.initData.alpha)*t;
                 break;
             case ETrackCmd.AlphaLerp:
-                obj.alpha+=(cmd.color.w-obj.alpha)*cmd.speed*ti;
+                obj.alpha+=(cmd.alpha-obj.alpha)*cmd.speed*ti;
                 break;
             case ETrackCmd.Hide:
                 obj.isVisible=false;
@@ -3303,8 +3435,48 @@ export class zlTrack
             case ETrackCmd.FlipH:
                 console.log("TODO zlTrack", cmd);
                 break;
+            case ETrackCmd.SetColor:
+                obj.Color=cmd.color;
+                break;
+            case ETrackCmd.Color:
+                let c=obj.Color;
+                if(!cmd.isInit) {
+                    cmd.isInit=true;
+                    cmd.initData={color:c}
+                }
+                c.x=cmd.initData.color.x+(cmd.color.x-cmd.initData.color.x)*t;
+                c.y=cmd.initData.color.y+(cmd.color.y-cmd.initData.color.y)*t;
+                c.z=cmd.initData.color.z+(cmd.color.z-cmd.initData.color.z)*t;
+                c.w=cmd.initData.color.w+(cmd.color.w-cmd.initData.color.w)*t;
+                obj.Color=c;
+                break;
+            case ETrackCmd.ColorLerp: {
+                let sp=cmd.speed*ti;
+                let c=obj.Color;
+                c.x+=(cmd.color.x-c.x)*sp;
+                c.y+=(cmd.color.y-c.y)*sp;
+                c.z+=(cmd.color.z-c.z)*sp;
+                c.w+=(cmd.color.w-c.w)*sp;
+                obj.Color=c;
+                break; }
+            case ETrackCmd.Width:
+                if(!cmd.isInit) {
+                    cmd.isInit=true;
+                    cmd.initData={wh:{x:obj.w,y:obj.h}}
+                }
+                obj.w=cmd.initData.wh.x+(cmd.wh.x-cmd.initData.wh.x)*t;
+                obj.SetCalRect();
+                break;
             case ETrackCmd.WidthLerp:
                 obj.w+=(cmd.wh.x-obj.w)*cmd.speed*ti;
+                obj.SetCalRect();
+                break;
+            case ETrackCmd.Height:
+                if(!cmd.isInit) {
+                    cmd.isInit=true;
+                    cmd.initData={wh:{x:obj.w,y:obj.h}}
+                }
+                obj.h=cmd.initData.wh.y+(cmd.wh.y-cmd.initData.wh.y)*t;
                 obj.SetCalRect();
                 break;
             case ETrackCmd.HeightLerp:
@@ -3324,7 +3496,7 @@ export class zlTrack
                 obj.isDisable=true;
                 break;
             case ETrackCmd.Text:
-                obj.SetText(cmd.text);
+                obj.Text=cmd.text;
                 break;
             default:
                 console.log("TODO zlTrack", cmd);
@@ -3536,12 +3708,12 @@ export class zlUIMgr extends zlUIWin
             break;
         case "font":
             let id=Number.parseInt(toks[1]);
-            let font=ImGui.CreateFont(toks[2].replace("\\s"," "), Number.parseInt(toks[3]), toks[4]);
+            let font=ImGui.CreateFont(toks[2].replace(/\\s/g," "), Number.parseInt(toks[3]), toks[4]);
             this.SetFont(id, font);
             break;
         case "mergefont": {
             let id=Number.parseInt(toks[1]);            
-            let font=ImGui.CreateFont(toks[4].replace("\\s"," "), Number.parseInt(toks[5]), toks[6]);
+            let font=ImGui.CreateFont(toks[4].replace(/\\s/g," "), Number.parseInt(toks[5]), toks[6]);
             font.AddFontRange(ParseText(toks[2]).charCodeAt(0), ParseText(toks[3]).charCodeAt(0));
             this.fonts[id].MergeFont(font);
             break; }

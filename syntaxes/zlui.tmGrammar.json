@@ -21,6 +21,7 @@
                 { "include": "#parameter_win"},
                 { "include": "#parameter"},
                 { "include": "#paren-object" },
+                { "include": "#paren-expression" },                
                 { "include": "#comment" }
             ]
         },
@@ -121,8 +122,13 @@
 
             ]
         },
-        "comments":{
+        "comment":{
             "patterns":[
+                {
+                    "begin": "#",
+                    "end":"$",
+                    "name": "comment.line"
+                },
                 {
                     "begin": "//",
                     "end":"$",
