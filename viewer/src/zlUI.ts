@@ -1244,6 +1244,10 @@ export class zlUIWin
             x2+=px;
             y2+=py;
         }
+        x1=Math.round(x1);
+        x2=Math.round(x2);
+        y1=Math.round(y1);
+        y2=Math.round(y2);
         this._screenXY.Set(x1, y1);
         this._screenMax.Set(x2, y2);
         this._clipXY.Set(x1,y1);
@@ -1896,6 +1900,8 @@ export class zlUIPanel extends zlUIImage
     
             x+=this._screenXY.x;
             y+=this._screenXY.y;
+            x=Math.round(x);
+            y=Math.round(y);
             if(!this._textPos) {
                 this._textPos=new ImGui.Vec2(x,y);
             }else {
