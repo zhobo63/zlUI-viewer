@@ -10,7 +10,11 @@
         "object": {
             "patterns": [
                 { 
-                    "match": "Object|Clone|Param|TrackGroup|Track",
+                    "match": "Object|Clone",
+                    "name": "keyword.type"
+                },
+                { 
+                    "match": "\\b(Param|TrackGroup|Track|PlayTrack)\\b",
                     "name": "keyword.type"
                 },
                 { 
@@ -78,6 +82,10 @@
                 {
                     "match":"\\b(ImageList|ImageW|ImageH|Text|Ascii|TextAlignW|TextAlignH|FontSpace)\\b",
                     "name":"constant.numeric.imagetext"
+                },
+                {
+                    "match": "\\b(SetPos|SetRect|SetWidth|SetHeight|Move|MoveLerp|MoveBezier|SetX|MoveX|MoveXLerp|SetY|MoveY|MoveYLerp|SetScale|Scale|ScaleLerp|Image|SetAlpha|Alpha|AlphaLerp|Hide|Show|FlipW|FlipH|SetRotate|Rotate|RotateLerp|SetColor|Color|ColorLerp|Width|WidthLerp|Height|HeightLerp|StopAni|PlayAni|AniSpeed|AniStartEnd|PlaySound|SoundFade|Volume|SetImageClip|ImageClip|ImageClipLerp|PlayTrack|StopTrack|Enable|Disable|Text)\\b",
+                    "name": "constant.numeric.track"
                 }
             ]
         },

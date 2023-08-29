@@ -1,5 +1,5 @@
 // Dark theme
-
+CreateFont Fontawesome fa-solid-900.woff2
 Font 0 Arial 16 bold
 Font 1 Verdana 26 bold
 MergeFont 0 \uf000 \uffff Fontawesome 16 normal

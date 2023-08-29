@@ -2,12 +2,16 @@ import { ImGui, ImGui_Impl } from "@zhobo63/imgui-ts";
 import { ImDrawList, ImVec2 } from "@zhobo63/imgui-ts/src/imgui";
 import { EType, GetInput, Input } from "@zhobo63/imgui-ts/src/input";
 
+export const Version="0.0.1";
+
 /*
 TODO
+
+use zlUIObject, features: rotate scale 
+
 zlUIImageText
 TrackGroup
 Arrange: Item mode
-TabIndex
 Hint
 
 ///////////////////////////////////
@@ -193,6 +197,24 @@ export function Inside(pos:ImGui.ImVec2, min:ImGui.ImVec2, max:ImGui.ImVec2):boo
    return (pos.x>=min.x&&pos.x<=max.x&&pos.y>=min.y&&pos.y<=max.y)?true:false;
 }
 
+function stringToColorHex(color:string):number
+{
+    let c=0;
+    for(let i=0;i<color.length;i++) {
+        let ci=color.charCodeAt(i);
+        let s=0;
+        if(ci>=48&&ci<=57) {
+            s=ci-48;
+        } else if(ci>=65&&ci<=70) {
+            s=10+ci-65;
+        } else if(ci>=97&&ci<=102) {
+            s=10+ci-97;
+        }
+        c=(c<<8)+s;
+    }
+    return c;
+}
+
 function toColorHex(c:Vec4):number
 {
     let r=Math.floor(c.x*255);
@@ -258,6 +280,8 @@ function ParseColor(s:string):number
         (Number.parseInt(toks[1])<<8)|
         (Number.parseInt(toks[2])<<16)|
         (255<<24);
+    }else if(s.match(/0x[A-Fa-f0-9]{8}/g))    {
+        c=stringToColorHex(s.slice(2));
     }
     else {
         c=Number.parseInt(s);
@@ -508,6 +532,19 @@ export interface Vec2
     y:number
 }
 
+function Vec2Add(a:Vec2, b:Vec2):Vec2
+{
+    return {x:a.x+b.x, y:a.y+b.y}
+}
+function Vec2Scale(v:Vec2, s:number):Vec2
+{
+    return {x:v.x*s, y:v.y*s}
+}
+function Vec2Multiply(a:Vec2, b:Vec2):Vec2
+{
+    return {x:a.x*b.x, y:a.y*b.y}
+}
+
 export interface Vec4
 {
     x:number
@@ -650,6 +687,280 @@ export function RenderArrow(drawlist:ImDrawList, pos:Vec2, color:number,dir:ImGu
     drawlist.AddTriangleFilled(vec_a, vec_b, vec_c, color);
 }
 
+export class Mat2
+{
+    constructor()
+    {
+    }
+
+    GetElement(row:number, col:number):number
+    {
+        if(row==0 && col==0) { 
+            return this.m11;
+        }else if(row==0 && col==1) { 
+            return this.m12;
+        }else if(row==1 && col==0) {
+            return this.m21;
+        }else if(row==1 && col==1) {
+            return this.m22;
+        }
+        return 0;
+    }
+
+    Identity():Mat2
+    {
+        this.m11=1;
+        this.m12=0; 
+        this.m21=0, 
+        this.m22=1;
+        return this;
+    }
+
+    SetRotate(radian:number):Mat2
+    {
+        this.m11=Math.cos(radian);
+        this.m12=Math.sin(radian);
+        this.m21=-Math.sin(radian);
+        this.m22=Math.cos(radian);
+        return this;
+    }
+    Multiply(m:Mat2):Mat2
+    {
+        let o=new Mat2();
+        const m11 = this.m11;
+        const m12 = this.m12;
+        const m21 = this.m21;
+        const m22 = this.m22;
+        o.m11 = m11*m.m11 + m12*m.m21;
+		o.m12 = m11*m.m12 + m12*m.m22;
+		o.m21 = m21*m.m11 + m22*m.m21;
+		o.m22 = m21*m.m12 + m22*m.m22;
+        return o;
+    }
+    Transform(v:Vec2):Vec2
+    {
+        const m11 = this.m11;
+        const m12 = this.m12;
+        const m21 = this.m21;
+        const m22 = this.m22;
+        return {
+            x:m11*v.x + m12*v.y,
+            y:m21*v.x + m22*v.y,
+        }
+    }
+    
+    m11:number=1;
+    m12:number=0;
+    m21:number=0;
+    m22:number=1;
+}
+
+function CounterWarp(t:number, cos:number):number
+{
+    const ATTENUATION=0.82279687;
+    const WORST_CASE_SLOPE=0.58549219;
+    let factor=1-ATTENUATION*cos;
+    let k=WORST_CASE_SLOPE*factor*factor;
+    return t*(k*t*(2*t-3)+1+k);
+}
+
+export class Quaternion
+{
+
+    Dot(q:Quaternion):number
+    {
+        return this.x * q.x + this.y * q.y + this.z * q.z + this.w * q.w;
+    }
+
+    Slerp(q:Quaternion, t:number):Quaternion
+    {
+        const cos=this.Dot(q);
+        t=(t<=0.5)?CounterWarp(t,cos):1-CounterWarp(1-t,cos);
+        let o:Quaternion=new Quaternion;
+        o.x=this.x+(q.x-this.x)*t;
+        o.y=this.y+(q.y-this.y)*t;
+        o.z=this.z+(q.z-this.z)*t;
+        o.w=this.w+(q.w-this.w)*t;
+        return o;
+    }
+
+    Multiply(q:Quaternion):Quaternion
+    {
+        let o=new Quaternion;
+        o.x=this.w * q.x + this.x * q.w + this.y * q.z - this.z * q.y;
+        o.y=this.w * q.y + this.y * q.w + this.z * q.x - this.x * q.z;
+        o.z=this.w * q.z + this.z * q.w + this.x * q.y - this.y * q.x;
+        o.w=this.w * q.w - this.x * q.x - this.y * q.y - this.z * q.z;
+        return o;
+    }
+
+    fromMat2(m:Mat2):Quaternion
+    {
+		let t = m.m11 + m.m22;
+        let r,invr;
+		if (t > 0)	{
+			r = Math.sqrt(t + 1.0);
+			this.w = r*0.5;
+			invr = 0.5 / r;
+			this.x = 0;
+			this.y = 0;
+			this.z = (m.m21 - m.m12)*invr;
+		}
+		else {
+			const next = [1, 2, 0];
+			let i = 0;
+			if (m.m22 > m.m11)	{
+				i = 1;
+			}
+			const j = next[i];
+			const k = next[j];
+			r = Math.sqrt(m.GetElement(i,i) - m.GetElement(j,j) - m.GetElement(k,k) + 1.0);
+            let v=[0,0,0];
+			v[i] = 0.5*r;
+			invr = 0.5 / r;
+			this.w = (m.GetElement(k,j) - m.GetElement(j,k)) * invr;
+			v[j] = (m.GetElement(j,i) + m.GetElement(i,j)) * invr;
+			v[k] = (m.GetElement(k,i) + m.GetElement(i,k)) * invr;
+            this.x=v[0];
+            this.y=v[1];
+            this.z=v[2];
+		}
+        return this;
+    }
+    toMat2():Mat2
+    {
+		const tx = 2.0*this.x;
+		const ty = 2.0*this.y;
+		const tz = 2.0*this.z;
+		const twz = tz*this.w;
+		const txx = tx*this.x;
+		const txy = ty*this.x;
+		const tyy = ty*this.y;
+		const tzz = tz*this.z;
+
+		let m=new Mat2();
+		m.m11 = 1.0 - (tyy + tzz);
+		m.m21 = txy + twz;
+		m.m12 = txy - twz;
+		m.m22 = 1.0 - (txx + tzz);
+        return m;
+    }
+
+    x:number;
+    y:number;
+    z:number;
+    w:number;
+}
+
+export class zlTransform2D
+{
+    constructor()
+    {
+
+    }
+
+    Transform(v:Vec2):Vec2
+    {
+        let o=this.rotate.Transform(v);
+        o=Vec2Scale(o, this.scale);
+        o=Vec2Add(o, this.translate);
+        return o;
+    }
+    Multiply(m:zlTransform2D):zlTransform2D
+    {
+        let tm=new zlTransform2D();
+        tm.scale=this.scale*m.scale;
+        tm.rotate=this.rotate.Multiply(m.rotate);
+        let t=this.rotate.Transform(m.translate);
+        t=Vec2Scale(t, this.scale);
+        tm.translate=Vec2Add(this.translate,t);
+        return tm;
+    }
+    Interpolate(target:zlTransform2D, t:number):zlTransform2D
+    {
+        if(t<=0)
+            return this;
+        if(t>=1)
+            return target;
+        let tm:zlTransform2D=new zlTransform2D;
+        tm.scale=this.scale+(target.scale-this.scale)*t;
+        tm.translate.x=this.translate.x+(target.translate.x-this.translate.x)*t;
+        tm.translate.y=this.translate.y+(target.translate.y-this.translate.y)*t;
+
+        let qStart=new Quaternion;
+        qStart.fromMat2(this.rotate);
+        let qTarget=new Quaternion;
+        qTarget.fromMat2(target.rotate);
+        let q=qStart.Slerp(qTarget, t);
+        this.rotate=q.toMat2();
+        return tm;
+    }
+
+    rotate:Mat2=new Mat2();
+    translate:Vec2={x:0,y:0};
+    scale:number=1;
+}
+
+export class Bezier
+{
+    constructor()
+    {
+
+    }
+
+    GetPoint(t:number):Vec2
+    {
+        if(!this.controlPoints||this.controlPoints.length==0)
+            return {x:0,y:0};
+        if(t>1) t=1;
+        const segs=Math.floor(this.controlPoints.length/4);
+        t=t*segs;
+        let seg=Math.floor(t);
+        if(seg>=segs) seg=segs-1;
+        const f=t-seg;
+        const f1=1-f;
+        const seg4=seg*4;
+        const p0=this.controlPoints[seg4];
+        const p1=this.controlPoints[seg4+1];
+        const p2=this.controlPoints[seg4+2];
+        const p3=this.controlPoints[seg4+3];
+        const a=f1*f1*f1;
+        const b=3*f1*f1*f;
+        const c=3*(f1)*f*f;
+        const d=f*f*f;
+        const x=a*p0.x+b*p1.x+c*p2.x+d*p3.x;
+        const y=a*p0.y+b*p1.y+c*p2.y+d*p3.y;
+        return {x:x,y:y};
+    }
+
+    ParseCmd(name:string, toks:string[]):boolean
+    {
+        this.controlPoints=[];
+        if(toks[0].startsWith("(")) {
+            for(let i=0;i<toks.length;i++) {
+                let tok=toks[i].match(/\d*/g).filter(e=>e);
+                this.controlPoints.push({x:parseFloat(tok[0]), y:parseFloat(tok[1])});
+            }
+        }else {
+            for(let i=0;i<toks.length;i+=2) {
+                this.controlPoints.push({
+                    x:Number.parseFloat(toks[i]),
+                    y:Number.parseFloat(toks[i+1]),
+                })
+            }
+        }
+        return this.controlPoints.length>=4;
+    }
+
+    controlPoints:Vec2[];
+}
+
+export class zlUIObject
+{
+    local:zlTransform2D;
+    world:zlTransform2D;
+}
+
 export class zlUIWin
 {
     constructor(own:zlUIMgr) {
@@ -658,14 +969,16 @@ export class zlUIWin
     }
 
     on_size: ((this:zlUIWin) => any)|null;
+    on_notify: ((this: zlUIWin, obj: zlUIWin) => any) | null; 
     on_change: ((this: zlUIWin, text: string) => any) | null; 
+    on_hover: ((this:zlUIWin, obj:zlUIWin) => any) | null;
 
     async Parse(lines:string[], start:number):Promise<number>
     {        
         let isComment=false;
         for(;start<lines.length;start++) {
             let line=lines[start];
-            let toks:string[]=line.toLowerCase().split(/\s|\t/).filter(e=>e);
+            let toks:string[]=line.toLowerCase().split(/\s/g).filter(e=>e);
             
             if(toks.length>0)   {
                 let tok=toks[0];
@@ -1014,10 +1327,10 @@ export class zlUIWin
     {
         let clip=this._owner.LastClipRect;
         if(clip) {
-            if(obj._screenMax.x<clip.x||obj._screenXY.x>clip.z)
+            if(obj._screenMax.x<clip.x||obj._screenXY.x>clip.z||
+                obj._screenMax.y<clip.y||obj._screenXY.y>clip.w) {
                 return false;
-            if(obj._screenMax.y<clip.y||obj._screenXY.y>clip.w)
-                return false;
+            }
         }
 
         if(obj.x>this.w||obj.y>this.h)
@@ -1079,6 +1392,7 @@ export class zlUIWin
     Paint(drawlist:ImGui.ImDrawList, parent:zlUIWin=null):void 
     {
         this._owner.paint_count++;
+        this._isPaintout=true;
         this.PaintChild(drawlist, parent);
         /*
         if(this._owner.notify==this) {
@@ -1365,7 +1679,7 @@ export class zlUIWin
         return (this._csid==csid)?this:null;        
     }
 
-    OnNotify():void {}
+    OnNotify():void { if(this.on_notify) this.on_notify(this);}
     OnClick():void {}
     GetUI(name:string):zlUIWin
     {
@@ -1468,6 +1782,7 @@ export class zlUIWin
     _clipXY:ImGui.ImVec2=new ImGui.ImVec2(0,0);
     _clipMax:ImGui.ImVec2=new ImGui.ImVec2(0,0);
     _autosize_change:boolean=false;
+    _isPaintout:boolean=false;
 
     user_data:any;
 }
@@ -1966,7 +2281,7 @@ export class zlUIEdit extends zlUIPanel
         switch(name) {
         case "password":
             this.isPassword=true;
-            this.password_char=toks[1];
+            this.password_char=ParseText(toks[1]);
             break;
         case "maxlength":
             this.max_text_length=Number.parseInt(toks[1]);
@@ -2033,6 +2348,8 @@ export class zlUIEdit extends zlUIPanel
         }
         inp.setText(this.text, 0, this._owner.GetFont(this.fontIndex));
         inp.setRect(this._screenXY.x, this._screenXY.y, this.w, this.h);
+        inp._dom_input.style.backgroundColor=textBg;
+        inp._dom_input.style.color=textCol;
         inp._dom_input.oninput=(e)=>{
             let text=inp._dom_input.value;
             if(this.max_text_length&&this.max_text_length>0)    {
@@ -2044,6 +2361,11 @@ export class zlUIEdit extends zlUIPanel
             }
             if(this._owner.on_edit) {
                 this._owner.on_edit(this);
+            }
+        }
+        inp.on_input=(e)=>{
+            if(inp.isTab) {
+                this._owner.nextEdit=this;
             }
         }
         this._owner.dom_input=inp;
@@ -2362,7 +2684,7 @@ export class zlUICombo extends zlUIButton
     {
         switch(name) {
         case "comboitems":
-            this.combo_items=toks.pop().split(/\s|\t/).filter(e=>e);
+            this.combo_items=toks.pop().split(/\s/g).filter(e=>e);
             break;
         case "combovalue":
             this.combo_value=Number.parseInt(toks[1]);
@@ -2826,7 +3148,7 @@ export class zlTexturePack
     async Parse(lines:string[]):Promise<boolean>
     {
         for(let line of lines) {
-            let toks:string[]=line.toLowerCase().split(/\s|\t/).filter(e=>e);
+            let toks:string[]=line.toLowerCase().split(/\s/g).filter(e=>e);
             if(toks.length>0)   {
                 await this.ParseCmd(toks[0], toks);
             }
@@ -2951,6 +3273,7 @@ interface ITrackCmd
     start?:number;
     end?:number;
     count?:number;
+    bezier?:Bezier;
 
     isInit?:boolean;
     initData?:InitData;
@@ -2968,7 +3291,7 @@ export class zlTrack
     {
         for(;start<lines.length;start++) {
             let line=lines[start];
-            let toks:string[]=line.toLowerCase().split(/\s|\t/).filter(e=>e);
+            let toks:string[]=line.toLowerCase().split(/\s/g).filter(e=>e);
             if(toks.length>0)   {
                 let tok=toks[0];
                 if(tok==="}") {
@@ -3057,9 +3380,17 @@ export class zlTrack
                 speed:Number.parseFloat(toks[5]),
             });
             break;
-        case "movebezier":
-            console.log("TODO", name);
-            break;
+        case "movebezier": {
+            let bezier:Bezier=new Bezier;
+            bezier.ParseCmd(name, toks.splice(3));
+            time2=Number.parseFloat(toks[2])*TimeUint;
+            this.cmd.push({
+                cmd:ETrackCmd.MoveBezier,
+                time_from:time1,
+                time_to:time2,
+                bezier:bezier,
+            });
+            break; }
         case "setx":
             this.cmd.push({
                 cmd:ETrackCmd.SetX,
@@ -3307,7 +3638,7 @@ export class zlTrack
                 cmd:ETrackCmd.Text,
                 time_from:time1,
                 time_to:time1,
-                text:toks[2],
+                text:ParseText(toks[2]),
             })
             break;
         default:
@@ -3338,6 +3669,7 @@ export class zlTrack
         this.wait_cmd=[];
         for(let cmd of this.cmd) {
             cmd.isInit=false;
+            cmd.period=cmd.time_to-cmd.time_from;
             this.period=Math.max(this.period, cmd.time_to);
             this.wait_cmd.push(cmd);
         }
@@ -3386,6 +3718,12 @@ export class zlTrack
                 obj.y+=(cmd.pos.y-obj.y)*cmd.speed*ti;
                 obj.SetCalRect();
                 break;
+            case ETrackCmd.MoveBezier: {
+                let p=cmd.bezier.GetPoint(t);
+                obj.x=p.x;
+                obj.y=p.y;
+                obj.SetCalRect();
+                break; }
             case ETrackCmd.SetX:
                 obj.x=cmd.pos.x;
                 obj.SetCalRect();
@@ -3570,7 +3908,7 @@ export class zlTrackGroup
     {
         for(;start<lines.length;start++) {
             let line=lines[start];
-            let toks:string[]=line.toLowerCase().split(/\s|\t/).filter(e=>e);
+            let toks:string[]=line.toLowerCase().split(/\s/g).filter(e=>e);
             if(toks.length>0)   {
                 let tok=toks[0];
                 if(tok==="track") {
@@ -3634,7 +3972,7 @@ export class zlTrackMgr
     Parse(lines:string[], start:number):number
     {
         let line=lines[start];
-        let toks:string[]=line.toLowerCase().split(/\s|\t/).filter(e=>e);
+        let toks:string[]=line.toLowerCase().split(/\s/g).filter(e=>e);
         if(toks.length>0)   {
             let tok=toks[0];
             if(tok==="trackgroup") {
@@ -3688,7 +4026,6 @@ export class zlUIMgr extends zlUIWin
 
     on_click: ((this: zlUIWin, obj: zlUIWin) => any) | null; 
     on_edit: ((this: zlUIWin, obj: zlUIWin) => any) | null; 
-    on_notify: ((this: zlUIWin, obj: zlUIWin) => any) | null; 
     on_popup_closed: ((this: zlUIWin, obj: zlUIWin) => any) | null; 
 
     async ParseCmd(name:string, toks:string[]):Promise<boolean>
@@ -3732,6 +4069,9 @@ export class zlUIMgr extends zlUIWin
             await fontface.load().then(r=>{console.log("FontFace load",r)})
             document.fonts.add(fontface);
             break; }
+        case "playtrack":
+            this.track.Play(toks[1], Number.parseInt(toks[2]));
+            break;
         default:
             return super.ParseCmd(name, toks);
         }
@@ -3759,7 +4099,7 @@ export class zlUIMgr extends zlUIWin
             console.log("Load " + path + file + " failed");
             return "";
         });        
-        return await this.Parse(t.split(/\r\n|\n/), 0) > 0;
+        return await this.Parse(t.split(/\r|\n/g).filter(e=>e), 0) > 0;
     }
     async LoadTexturePack(file:string, path:string):Promise<boolean>
     {
@@ -3773,7 +4113,7 @@ export class zlUIMgr extends zlUIWin
             console.log("LoadTexturePack", r);
             return "";
         });
-        return await this.texture.Parse(t.split(/\r\n|\n/));
+        return await this.texture.Parse(t.split(/\r|\n/g).filter(e=>e));
     }
 
     Create(name:string):zlUIWin
@@ -3844,8 +4184,16 @@ export class zlUIMgr extends zlUIWin
             if(!notify.isDisable)   {
                 notify.isDown=isDown;
             }
-            if(this.hover && this.hover!=notify)  {
-                this.hover.isDown=false;
+            if(this.hover!=notify)  {
+                if(this.hover) {
+                    this.hover.isDown=false;
+                }
+                if(this.on_hover) {
+                    this.on_hover(notify);
+                }
+                if(notify.on_hover) {
+                    notify.on_hover(notify);
+                }
             }
             this.hover=notify;
         }
@@ -3868,7 +4216,23 @@ export class zlUIMgr extends zlUIWin
         this.refresh_count=0;
         this.calrect_count=0;
         super.Refresh(ti, null);
+        if(this.nextEdit) {
+            this.NextEdit(this.nextEdit);
+            this.nextEdit=undefined;
+        }
+        this.ClearPaintout(this);
     }
+
+    ClearPaintout(o:zlUIWin)
+    {
+        o._isPaintout=false;
+        for(let ch of o.pChild) {
+            if(!ch.isVisible)
+                continue;
+            this.ClearPaintout(ch);
+        }
+    }
+
     Paint(drawlist: ImGui.ImDrawList, parent?: zlUIWin): void {
         this.paint_count=0;
         super.Paint(drawlist, this);
@@ -3933,6 +4297,30 @@ export class zlUIMgr extends zlUIWin
             this.popup=null;
         }
     }    
+    NextEdit(current:zlUIEdit)
+    {
+        let wait:zlUIWin[]=[this];
+        let list:zlUIEdit[]=[];
+        while(wait.length>0) {
+            let win=wait.shift();
+            for(let ch of win.pChild) {
+                if(!ch.isVisible||!ch._isPaintout)
+                {
+                    continue;
+                }
+                wait.push(ch);
+                if(ch instanceof zlUIEdit) {
+                    list.push(ch);
+                }
+            }
+        }
+        if(!list.length)
+            return;
+        let i=list.indexOf(current)+1;
+        if(i>=list.length) {i=0;}
+        //console.log("NextEdit:"+i, list);
+        list[i].OnNotify();
+    }
 
     GetTrack(name:string):zlTrackGroup
     {
@@ -4002,6 +4390,7 @@ export class zlUIMgr extends zlUIWin
 
     default_panel_color:number=0xffebebeb;
     dom_input:Input;
+    nextEdit:zlUIEdit;
 
     track:zlTrackMgr;
 

@@ -1,5 +1,3 @@
-Font 0 Arial 16 bold
-
 ifnot DarkTheme include dark.ui
 
 Clone Panel
@@ -39,3 +37,28 @@ Clone Panel
     }
 
 }
+
+Clone Frame
+{
+    Name move_test
+    RectWH 100 400 30 30
+}
+
+TrackGroup move_test
+{
+    Track move_test
+    {
+        MoveLerp 0 30 200 400 4
+        Move 30 60 300 450
+        MoveBezier 60 120 (300,450) (200,550) (100,450) (100,400)
+    }
+    Track move_test
+    {
+        Text 0 \uf105
+        Text 5 \uf101
+        Text 10 \uf103
+        Text 15 \uf103
+    }
+}
+
+PlayTrack move_test -1

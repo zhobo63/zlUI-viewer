@@ -17,20 +17,20 @@ Clone Panel
     Clone Text
     {
         Name txt_user
-        RectWH 10 60 100 30
+        RectWH 20 60 50 30
         TextAlignW right
-        Text User
+        Text \uf007
     }
     Clone txt_user
     {
         Name txt_pw
         Y 100
-        Text Password
+        Text \uf023
     }
     Clone Edit
     {
         Name ed_user
-        RectWH 130 60 150 30
+        RectWH 90 60 150 30
         Rounding 5
     }
     Clone ed_user
@@ -45,7 +45,7 @@ Clone Panel
         Name btn_ok
         RectWH 10 10 100 30
         Anchor xy 0.5 1
-        Text OK 
+        Text \uf00c
     }
 }
 
