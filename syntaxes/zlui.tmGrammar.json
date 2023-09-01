@@ -48,11 +48,11 @@
         "parameter_win":{
             "patterns":[
                 {
-                    "match":"\\b(Name|RectWH|Top|Y|Left|X|Width|W|Height|H|Align|Visible|Notify|Drag|Autosize|AutoHeight|Padding|Anchor|Dock|Offset|Clip|Arrange|Hint|Mergin)\\b",
+                    "match":"\\b(Name|RectWH|Top|Y|Left|X|Width|W|Height|H|Align|Visible|Notify|Drag|Autosize|AutoHeight|Padding|Anchor|Dock|Offset|Clip|Arrange|Hint|Mergin|Origin)\\b",
                     "name":"constant.numeric.win"
                 },
                 {
-                    "match":"\\b(Image|Color)\\b",
+                    "match":"\\b(Image|Color|Color4)\\b",
                     "name":"constant.numeric.image"
                 },
                 {
@@ -64,7 +64,7 @@
                     "name":"constant.numeric.edit"
                 },
                 {
-                    "match":"\\b(BoardDown|Board|BoardUp|BoardHover|Color|ColorDown|ColorHover|ColorDisable|TextColor|TextColorDown|TextColorUp|Image|ImageDown|ImageHover|DrawButton)\\b",
+                    "match":"\\b(BoardDown|Board|BoardUp|BoardHover|Color|ColorDown|ColorHover|ColorDown4|ColorHover4|ColorDisable|TextColor|TextColorDown|TextColorUp|Image|ImageDown|ImageHover|DrawButton)\\b",
                     "name":"constant.numeric.button"
                 },
                 {

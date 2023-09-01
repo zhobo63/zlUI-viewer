@@ -7,8 +7,10 @@ export const Version="0.0.1";
 /*
 TODO
 
-use zlUIObject, features: rotate scale 
+use ImTransform, features: rotate scale 
+origin:Vec2
 
+Color[4]
 zlUIImageText
 TrackGroup
 Arrange: Item mode
@@ -17,41 +19,6 @@ Hint
 ///////////////////////////////////
 /// zlUIWin 
 ///////////////////////////////////
-
-    RectWH x y w h
-
-    Top 
-    y
-
-    Left
-    x
-
-    Width
-    w
-
-    Height
-    h
-
-    Align
-
-    +x
-    +y
-    add_x add_y
-    
-    BorderWidth
-    Padding
-
-    Margin
-    Anchor
-    Dock
-    Arrange
-    Offset
-    Autosize
-
-    Object
-    Clone
-    Param
-    
 
 ///////////////////////////////////
 /// zlUIImage extends zlUIWin 
@@ -326,6 +293,7 @@ function ParseAlign(tok:string):Align
     case 'right':
         return Align.Right;
     case 'down':
+    case 'bottom':
         return Align.Down;
     case 'center':
         return Align.Center;
@@ -687,6 +655,7 @@ export function RenderArrow(drawlist:ImDrawList, pos:Vec2, color:number,dir:ImGu
     drawlist.AddTriangleFilled(vec_a, vec_b, vec_c, color);
 }
 
+/*
 export class Mat2
 {
     constructor()
@@ -901,6 +870,13 @@ export class zlTransform2D
     scale:number=1;
 }
 
+export class zlUIObject
+{
+    local:zlTransform2D;
+    world:zlTransform2D;
+}
+*/
+
 export class Bezier
 {
     constructor()
@@ -955,11 +931,6 @@ export class Bezier
     controlPoints:Vec2[];
 }
 
-export class zlUIObject
-{
-    local:zlTransform2D;
-    world:zlTransform2D;
-}
 
 export class zlUIWin
 {
@@ -1213,6 +1184,12 @@ export class zlUIWin
                 await this.ParseCmd(toks[2], toks.slice(2));
             }
             break;
+        case "origin":
+            this.origin={
+                x:Number.parseFloat(toks[1]),
+                y:Number.parseFloat(toks[2])
+            };
+            break;
         default:
             console.log("zlUIWin " + this.Name + " unknow param " + name);
             return false;
@@ -1247,6 +1224,7 @@ export class zlUIWin
         this.hint=obj.hint;
         this.margin=Clone(obj.margin);
         this.alpha=obj.alpha;
+        this.origin=Clone(obj.origin);
 
         this.pChild=[];
         for(let ch of obj.pChild) {
@@ -1557,6 +1535,10 @@ export class zlUIWin
             y1+=py;
             x2+=px;
             y2+=py;
+
+            this._world=parent._world.Multiply(this._local);
+        }else {
+            this._world=this._local;
         }
         x1=Math.round(x1);
         x2=Math.round(x2);
@@ -1702,25 +1684,6 @@ export class zlUIWin
         if(!this.pChild)
             this.pChild=[];
         this.pChild.push(obj);
-
-        /*
-        if(this.autosize) {
-            if(this.autosize&EAutosize.Width) {
-                let w=obj.x+obj.h+this.padding;
-                if(w>this.w) {
-                    this.w=w;
-                    this.SetCalRect();
-                }
-            }
-            if(this.autosize&EAutosize.Height) {
-                let h=obj.y+obj.h+this.padding;
-                if(h>this.h) {
-                    this.h=h;
-                    this.SetCalRect();
-                }
-            }
-        }
-        */
     }
     GetLastChild():zlUIWin
     {
@@ -1774,6 +1737,7 @@ export class zlUIWin
     autosize:EAutosize=EAutosize.None;    
     hint:string;
     alpha:number=1;
+    origin:Vec2;
 
     _csid:string;
     _owner:zlUIMgr;
@@ -1783,6 +1747,9 @@ export class zlUIWin
     _clipMax:ImGui.ImVec2=new ImGui.ImVec2(0,0);
     _autosize_change:boolean=false;
     _isPaintout:boolean=false;
+
+    _local:ImGui.ImTransform=new ImGui.ImTransform();
+    _world:ImGui.ImTransform;
 
     user_data:any;
 }
@@ -1803,6 +1770,12 @@ export class zlUIImage extends zlUIWin
         case "color":
             this.color=ParseColor(toks[1]);
             break;
+        case "rounding":
+            this.rounding=Number.parseInt(toks[1]);
+            break;
+        case "roundingcorner":
+            this.roundingCorner=ParseCorner(toks[1]);
+            break;    
         default:
             return await super.ParseCmd(name, toks);
         }
@@ -1814,6 +1787,8 @@ export class zlUIImage extends zlUIWin
         let o=obj as zlUIImage;
         this.image=o.image;
         this.color=o.color;
+        this.rounding=o.rounding;
+        this.roundingCorner=o.roundingCorner;
     }
     Clone():zlUIWin
     {
@@ -1846,10 +1821,11 @@ export class zlUIImage extends zlUIWin
                 if(!im.uv1) {
                     this.image= this.UpdateImage(im);
                 }
-                drawlist.AddImage(im.texture._texture, this._screenXY, this._screenMax, im.uv1, im.uv2, this.color);
+                drawlist.AddImageRounded(
+                    im.texture._texture, 
+                    this._screenXY, this._screenMax, im.uv1, im.uv2, this.color,
+                    this.rounding, this.roundingCorner);
             }
-        }else {
-            //drawlist.AddRect(this._screenXY, this._screenMax, 0xffffffff);
         }
         super.Paint(drawlist, parent);
     }
@@ -1860,6 +1836,8 @@ export class zlUIImage extends zlUIWin
 
     image:TexturePack;
     color:number=0xffffffff;
+    rounding:number=0;
+    roundingCorner:ImGui.ImDrawCornerFlags=ImGui.ImDrawCornerFlags.All;
 }
 
 export class zlUIPanel extends zlUIImage
@@ -1884,15 +1862,9 @@ export class zlUIPanel extends zlUIImage
         case "bordercolor":
             this.borderColor=ParseColor(toks[1]);
             break;
-        case "hovercolor":
+        case "colorhover":
             this.isDrawHover=true;
-            this.hoverColor=ParseColor(toks[1]);
-            break;
-        case "rounding":
-            this.rounding=Number.parseInt(toks[1]);
-            break;
-        case "roundingcorner":
-            this.roundingCorner=ParseCorner(toks[1]);
+            this.colorHover=ParseColor(toks[1]);
             break;
         case "text":
             this.text=ParseText(toks.pop());
@@ -1931,6 +1903,22 @@ export class zlUIPanel extends zlUIImage
                 y:Number.parseInt(toks[2])
             };
             break;
+        case "color4":
+            this.color4=[
+                ParseColor(toks[1]),
+                ParseColor(toks[2]),
+                ParseColor(toks[3]),
+                ParseColor(toks[4]),
+            ];
+            break;
+        case "colorhover4":
+            this.isDrawHover=true;
+            this.colorHover4=[
+                ParseColor(toks[1]),
+                ParseColor(toks[2]),
+                ParseColor(toks[3]),
+                ParseColor(toks[4])]
+            break;
         default:
             return await super.ParseCmd(name, toks);
         }
@@ -1967,13 +1955,13 @@ export class zlUIPanel extends zlUIImage
         this.isDrawBorder=o.isDrawBorder;
         this.isDrawHover=o.isDrawHover;
         this.borderColor=o.borderColor;
-        this.hoverColor=o.hoverColor;
+        this.colorHover=o.colorHover;
         this.board=this.CloneBoard(o.board);
         this.drawBoard=o.drawBoard;
-        this.rounding=o.rounding;
-        this.roundingCorner=o.roundingCorner;
         this.textAnchor=Clone(o.textAnchor);
         this.textoffset=Clone(o.textoffset);
+        this.color4=Clone(o.color4);
+        this.colorHover4=Clone(o.colorHover4);
     }
     Clone():zlUIWin
     {
@@ -2071,6 +2059,20 @@ export class zlUIPanel extends zlUIImage
             }
         }
     }
+    PaintClient(drawlist:ImGui.ImDrawList):void 
+    {
+        if(this.isDrawClient)   {
+            if(this.color4) {
+                drawlist.AddRectFilledMultiColorRound(
+                    this._screenXY, this._screenMax, 
+                    this.color4[0], this.color4[1], this.color4[2], this.color4[3],
+                    this.rounding, this.roundingCorner);
+            }else {
+                drawlist.AddRectFilled(this._screenXY, this._screenMax, this.color,
+                    this.rounding, this.roundingCorner);
+            }
+        }
+    }
     PaintPanel(drawlist:ImGui.ImDrawList):void 
     {
         if(this.image)  {
@@ -2081,18 +2083,22 @@ export class zlUIPanel extends zlUIImage
                 }
                 drawlist.AddImage(im.texture._texture, this._screenXY, this._screenMax, im.uv1, im.uv2, this.color);
             }
-        }    
-        if(this.isDrawClient)   {
-            drawlist.AddRectFilled(this._screenXY, this._screenMax, this.color,
-                this.rounding, this.roundingCorner);
         }
+        this.PaintClient(drawlist);
         if(this.drawBoard)  {
             this.drawBoard.color=this.color;
             this.PaintBoard(drawlist, this.drawBoard);
         }
         if(this.isDrawHover && this._owner.hover==this) {
-            drawlist.AddRectFilled(this._screenXY, this._screenMax, this.hoverColor,
-                this.rounding, this.roundingCorner);
+            if(this.colorHover4) {
+                drawlist.AddRectFilledMultiColorRound(
+                    this._screenXY, this._screenMax, 
+                    this.colorHover4[0], this.colorHover4[1], this.colorHover4[2], this.colorHover4[3],
+                    this.rounding, this.roundingCorner)                
+            }else {
+                drawlist.AddRectFilled(this._screenXY, this._screenMax, this.colorHover,
+                    this.rounding, this.roundingCorner);
+            }
         }
         if(this.isDrawBorder)   {
             drawlist.AddRect(this._screenXY, this._screenMax, this.borderColor, this.rounding, 
@@ -2253,13 +2259,14 @@ export class zlUIPanel extends zlUIImage
     isDrawBorder:boolean=false;
     isDrawHover:boolean=false;
     borderColor:number=0xffffffff;
-    hoverColor:number;
+    colorHover:number=0xffffffff;
     board:Board;
     drawBoard:Board;
-    rounding:number=0;
-    roundingCorner:ImGui.ImDrawCornerFlags=ImGui.ImDrawCornerFlags.All;
     textAnchor:IAnchor;
     textoffset:Vec2;
+
+    color4:number[];
+    colorHover4:number[];
 
     //underline variant no copy needed
     _textPos:ImGui.Vec2;
@@ -2404,11 +2411,23 @@ export class zlUIButton extends zlUIPanel
         case "color":
             this.colorUp=this.color=this.colorHover=ParseColor(toks[1]);
             break;
+        case "color4":
+            this.colorUp4=[
+                ParseColor(toks[1]), 
+                ParseColor(toks[2]),
+                ParseColor(toks[3]),
+                ParseColor(toks[4])
+            ]
+            break;
         case "colordown":
             this.colorDown=ParseColor(toks[1]);
             break;
-        case "colorhover":
-            this.colorHover=ParseColor(toks[1]);
+        case "colordown4":
+            this.colorDown4=[
+                ParseColor(toks[1]), 
+                ParseColor(toks[2]),
+                ParseColor(toks[3]),
+                ParseColor(toks[4])];
             break;
         case "colordisable":
             this.colorDisable=ParseColor(toks[1]);
@@ -2453,7 +2472,6 @@ export class zlUIButton extends zlUIPanel
         this.boardHover=this.CloneBoard(o.boardHover);
         this.colorDown=o.colorDown;
         this.colorUp=o.colorUp;
-        this.colorHover=o.colorHover;
         this.colorDisable=o.colorDisable;
         this.textColorDown=o.textColorDown;
         this.textColorUp=o.textColorUp;
@@ -2462,12 +2480,43 @@ export class zlUIButton extends zlUIPanel
         this.imageHover=o.imageHover;
         this.isEnable=o.isEnable;
         this.isPaintButton=o.isPaintButton;
+        this.colorDown4=Clone(o.colorDown4);
+        this.colorUp4=Clone(o.colorUp4);
     }
     Clone():zlUIWin
     {
         let obj=new zlUIButton(this._owner)
         obj.Copy(this);
         return obj;
+    }
+    PaintClient(drawlist: ImGui.ImDrawList): void {
+        if(this.isDrawClient)   {
+            let color:number;
+            let color4:number[];
+
+            if(!this.isEnable)  {
+                color=this.colorDisable;
+            }else if(this.isDown) {
+                color=this.colorDown;
+                color4=this.colorDown4;
+            }else if(this._owner.hover==this) {
+                color=this.colorHover;
+                color4=this.colorHover4;
+            }else {
+                color=this.colorUp;
+                color4=this.colorUp4;
+            }
+
+            if(color4) {
+                drawlist.AddRectFilledMultiColorRound(
+                    this._screenXY, this._screenMax, 
+                    color4[0], color4[1], color4[2], color4[3],
+                    this.rounding, this.roundingCorner);
+            }else {
+                drawlist.AddRectFilled(this._screenXY, this._screenMax, color,
+                    this.rounding, this.roundingCorner);
+            }
+        }
     }
     PaintButton():void
     {
@@ -2483,13 +2532,12 @@ export class zlUIButton extends zlUIPanel
             }
             this.color=this.colorDown;
         }else if(this._owner.hover==this) {
+            this.isDrawHover=false;
             this.drawBoard=this.boardHover;
             this.image=this.imageHover;
-            this.color=this.colorHover;
         }else {
             this.drawBoard=this.boardUp;
             this.image=this.imageUp;
-            this.color=this.colorUp;
         }
     }
     PaintTextColor():void
@@ -2546,7 +2594,6 @@ export class zlUIButton extends zlUIPanel
     boardHover:Board;
     colorDown:number=0xffffffff;
     colorUp:number=0xffffffff;
-    colorHover:number=0xffffffff;
     colorDisable:number=0xff787878;
     textColorDown:number=0xffffffff;
     textColorUp:number=0xff808080;
@@ -2554,6 +2601,9 @@ export class zlUIButton extends zlUIPanel
     imageUp:TexturePack;
     imageHover:TexturePack;
     isEnable:boolean=true;
+
+    colorDown4:number[];
+    colorUp4:number[];
 }
 
 export class zlUICheck extends zlUIButton
