@@ -1,6 +1,5 @@
 import { ImGui,ImGui_Impl } from "@zhobo63/imgui-ts";
-import { zlUIMgr } from "./zlUI";
-
+import { zlUIMgr } from "@zhobo63/zlui-ts";
 
 export class App
 {

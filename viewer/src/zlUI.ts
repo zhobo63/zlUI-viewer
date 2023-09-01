@@ -177,7 +177,7 @@ function stringToColorHex(color:string):number
         } else if(ci>=97&&ci<=102) {
             s=10+ci-97;
         }
-        c=(c<<8)+s;
+        c=(c<<4)+s;
     }
     return c;
 }
@@ -349,6 +349,7 @@ function ParseAutosize(tok:string):EAutosize
     case "all":
         return EAutosize.All;
     }
+    return EAutosize.Height;
 }
 
 export interface IAutosize
@@ -392,6 +393,7 @@ function ParseCorner(tok:string):ImGui.ImDrawCornerFlags
     case "all":
         return ImGui.ImDrawCornerFlags.All;
     }
+    return ImGui.ImDrawCornerFlags.None;
 }
 
 
@@ -568,6 +570,7 @@ function ParseArrange(tok:string):EArrange
     case "content":
         return EArrange.Content;
     }
+    return EArrange.Content;
 }
 
 function ParseDirection(tok:string):EDirection
@@ -655,228 +658,6 @@ export function RenderArrow(drawlist:ImDrawList, pos:Vec2, color:number,dir:ImGu
     drawlist.AddTriangleFilled(vec_a, vec_b, vec_c, color);
 }
 
-/*
-export class Mat2
-{
-    constructor()
-    {
-    }
-
-    GetElement(row:number, col:number):number
-    {
-        if(row==0 && col==0) { 
-            return this.m11;
-        }else if(row==0 && col==1) { 
-            return this.m12;
-        }else if(row==1 && col==0) {
-            return this.m21;
-        }else if(row==1 && col==1) {
-            return this.m22;
-        }
-        return 0;
-    }
-
-    Identity():Mat2
-    {
-        this.m11=1;
-        this.m12=0; 
-        this.m21=0, 
-        this.m22=1;
-        return this;
-    }
-
-    SetRotate(radian:number):Mat2
-    {
-        this.m11=Math.cos(radian);
-        this.m12=Math.sin(radian);
-        this.m21=-Math.sin(radian);
-        this.m22=Math.cos(radian);
-        return this;
-    }
-    Multiply(m:Mat2):Mat2
-    {
-        let o=new Mat2();
-        const m11 = this.m11;
-        const m12 = this.m12;
-        const m21 = this.m21;
-        const m22 = this.m22;
-        o.m11 = m11*m.m11 + m12*m.m21;
-		o.m12 = m11*m.m12 + m12*m.m22;
-		o.m21 = m21*m.m11 + m22*m.m21;
-		o.m22 = m21*m.m12 + m22*m.m22;
-        return o;
-    }
-    Transform(v:Vec2):Vec2
-    {
-        const m11 = this.m11;
-        const m12 = this.m12;
-        const m21 = this.m21;
-        const m22 = this.m22;
-        return {
-            x:m11*v.x + m12*v.y,
-            y:m21*v.x + m22*v.y,
-        }
-    }
-    
-    m11:number=1;
-    m12:number=0;
-    m21:number=0;
-    m22:number=1;
-}
-
-function CounterWarp(t:number, cos:number):number
-{
-    const ATTENUATION=0.82279687;
-    const WORST_CASE_SLOPE=0.58549219;
-    let factor=1-ATTENUATION*cos;
-    let k=WORST_CASE_SLOPE*factor*factor;
-    return t*(k*t*(2*t-3)+1+k);
-}
-
-export class Quaternion
-{
-
-    Dot(q:Quaternion):number
-    {
-        return this.x * q.x + this.y * q.y + this.z * q.z + this.w * q.w;
-    }
-
-    Slerp(q:Quaternion, t:number):Quaternion
-    {
-        const cos=this.Dot(q);
-        t=(t<=0.5)?CounterWarp(t,cos):1-CounterWarp(1-t,cos);
-        let o:Quaternion=new Quaternion;
-        o.x=this.x+(q.x-this.x)*t;
-        o.y=this.y+(q.y-this.y)*t;
-        o.z=this.z+(q.z-this.z)*t;
-        o.w=this.w+(q.w-this.w)*t;
-        return o;
-    }
-
-    Multiply(q:Quaternion):Quaternion
-    {
-        let o=new Quaternion;
-        o.x=this.w * q.x + this.x * q.w + this.y * q.z - this.z * q.y;
-        o.y=this.w * q.y + this.y * q.w + this.z * q.x - this.x * q.z;
-        o.z=this.w * q.z + this.z * q.w + this.x * q.y - this.y * q.x;
-        o.w=this.w * q.w - this.x * q.x - this.y * q.y - this.z * q.z;
-        return o;
-    }
-
-    fromMat2(m:Mat2):Quaternion
-    {
-		let t = m.m11 + m.m22;
-        let r,invr;
-		if (t > 0)	{
-			r = Math.sqrt(t + 1.0);
-			this.w = r*0.5;
-			invr = 0.5 / r;
-			this.x = 0;
-			this.y = 0;
-			this.z = (m.m21 - m.m12)*invr;
-		}
-		else {
-			const next = [1, 2, 0];
-			let i = 0;
-			if (m.m22 > m.m11)	{
-				i = 1;
-			}
-			const j = next[i];
-			const k = next[j];
-			r = Math.sqrt(m.GetElement(i,i) - m.GetElement(j,j) - m.GetElement(k,k) + 1.0);
-            let v=[0,0,0];
-			v[i] = 0.5*r;
-			invr = 0.5 / r;
-			this.w = (m.GetElement(k,j) - m.GetElement(j,k)) * invr;
-			v[j] = (m.GetElement(j,i) + m.GetElement(i,j)) * invr;
-			v[k] = (m.GetElement(k,i) + m.GetElement(i,k)) * invr;
-            this.x=v[0];
-            this.y=v[1];
-            this.z=v[2];
-		}
-        return this;
-    }
-    toMat2():Mat2
-    {
-		const tx = 2.0*this.x;
-		const ty = 2.0*this.y;
-		const tz = 2.0*this.z;
-		const twz = tz*this.w;
-		const txx = tx*this.x;
-		const txy = ty*this.x;
-		const tyy = ty*this.y;
-		const tzz = tz*this.z;
-
-		let m=new Mat2();
-		m.m11 = 1.0 - (tyy + tzz);
-		m.m21 = txy + twz;
-		m.m12 = txy - twz;
-		m.m22 = 1.0 - (txx + tzz);
-        return m;
-    }
-
-    x:number;
-    y:number;
-    z:number;
-    w:number;
-}
-
-export class zlTransform2D
-{
-    constructor()
-    {
-
-    }
-
-    Transform(v:Vec2):Vec2
-    {
-        let o=this.rotate.Transform(v);
-        o=Vec2Scale(o, this.scale);
-        o=Vec2Add(o, this.translate);
-        return o;
-    }
-    Multiply(m:zlTransform2D):zlTransform2D
-    {
-        let tm=new zlTransform2D();
-        tm.scale=this.scale*m.scale;
-        tm.rotate=this.rotate.Multiply(m.rotate);
-        let t=this.rotate.Transform(m.translate);
-        t=Vec2Scale(t, this.scale);
-        tm.translate=Vec2Add(this.translate,t);
-        return tm;
-    }
-    Interpolate(target:zlTransform2D, t:number):zlTransform2D
-    {
-        if(t<=0)
-            return this;
-        if(t>=1)
-            return target;
-        let tm:zlTransform2D=new zlTransform2D;
-        tm.scale=this.scale+(target.scale-this.scale)*t;
-        tm.translate.x=this.translate.x+(target.translate.x-this.translate.x)*t;
-        tm.translate.y=this.translate.y+(target.translate.y-this.translate.y)*t;
-
-        let qStart=new Quaternion;
-        qStart.fromMat2(this.rotate);
-        let qTarget=new Quaternion;
-        qTarget.fromMat2(target.rotate);
-        let q=qStart.Slerp(qTarget, t);
-        this.rotate=q.toMat2();
-        return tm;
-    }
-
-    rotate:Mat2=new Mat2();
-    translate:Vec2={x:0,y:0};
-    scale:number=1;
-}
-
-export class zlUIObject
-{
-    local:zlTransform2D;
-    world:zlTransform2D;
-}
-*/
-
 export class Bezier
 {
     constructor()
@@ -935,7 +716,9 @@ export class Bezier
 export class zlUIWin
 {
     constructor(own:zlUIMgr) {
-        this._owner=own;
+        if(own) {
+            this._owner=own;
+        }
         this._csid="Win";
     }
 
@@ -1190,6 +973,18 @@ export class zlUIWin
                 y:Number.parseFloat(toks[2])
             };
             break;
+        case "originoffset":
+            this.originOffset={
+                x:Number.parseInt(toks[1]),
+                y:Number.parseInt(toks[2])
+            }
+            break;
+        case "scale":
+            this.scale=Number.parseFloat(toks[1]);
+            break;
+        case "rotate":
+            this.rotate=Number.parseFloat(toks[1]);
+            break;
         default:
             console.log("zlUIWin " + this.Name + " unknow param " + name);
             return false;
@@ -1224,7 +1019,10 @@ export class zlUIWin
         this.hint=obj.hint;
         this.margin=Clone(obj.margin);
         this.alpha=obj.alpha;
+        this.rotate=obj.rotate;
+        this.scale=obj.scale;
         this.origin=Clone(obj.origin);
+        this.originOffset=Clone(obj.originOffset);
 
         this.pChild=[];
         for(let ch of obj.pChild) {
@@ -1264,7 +1062,7 @@ export class zlUIWin
         }
     }
 
-    Refresh(ti:number, parent:zlUIWin=null):void 
+    Refresh(ti:number, parent?:zlUIWin):void 
     {        
         this._owner.refresh_count++;
         if(this.autosize!=EAutosize.None)   {
@@ -1282,13 +1080,12 @@ export class zlUIWin
             this._owner.calrect_count++;
             this.CalRect(parent);
         }
-        let to_delete:number[];
+        let to_delete:number[]=[];
 
         for(let i=0;i<this.pChild.length;i++)   {
             let obj=this.pChild[i];
             if(obj.isDelete) {
                 obj.isDelete=false;
-                if(!to_delete) to_delete=[]
                 to_delete.push(i);
                 continue;
             }
@@ -1297,7 +1094,7 @@ export class zlUIWin
             }
         }
         while(to_delete&&to_delete.length>0) {
-            let i=to_delete.pop();
+            let i=to_delete.pop() as number;
             this.pChild.splice(i,1);                
         }
     }
@@ -1340,7 +1137,7 @@ export class zlUIWin
         }
     }
 
-    PaintChild(drawlist:ImGui.ImDrawList, parent:zlUIWin):void
+    PaintChild(drawlist:ImGui.ImDrawList):void
     {
         if(this.isClip) {
             drawlist.PushClipRect(this._clipXY, this._clipMax);
@@ -1359,7 +1156,7 @@ export class zlUIWin
             }
             if(!this.IsVisible(obj))
                 continue;
-            obj.Paint(drawlist, this);
+            obj.Paint(drawlist);
         }
         if(this.isClip) {
             this._owner.clip_stack.pop();
@@ -1367,11 +1164,11 @@ export class zlUIWin
         }
     }
 
-    Paint(drawlist:ImGui.ImDrawList, parent:zlUIWin=null):void 
+    Paint(drawlist:ImGui.ImDrawList):void 
     {
         this._owner.paint_count++;
         this._isPaintout=true;
-        this.PaintChild(drawlist, parent);
+        this.PaintChild(drawlist);
         /*
         if(this._owner.notify==this) {
             drawlist.AddRect(this._screenXY, this._screenMax, 0xff00ff00);
@@ -1406,6 +1203,9 @@ export class zlUIWin
         let y1=this.y;
         let x2=this.x+this.w;
         let y2=this.y+this.h;
+        let px=0;
+        let py=0;
+        
         if(parent)  {
             if(parent.isCalRect)
                 return;
@@ -1529,17 +1329,20 @@ export class zlUIWin
                 this.h=y2-y1;
             }
         
-            const px=parent._screenXY.x+this.offset.x;    //+parent.borderWidth;
-            const py=parent._screenXY.y+this.offset.y;    //+parent.borderWidth;
-            x1+=px;
-            y1+=py;
-            x2+=px;
-            y2+=py;
-
-            this._world=parent._world.Multiply(this._local);
-        }else {
-            this._world=this._local;
+            px=parent._screenXY.x+this.offset.x;    //+parent.borderWidth;
+            py=parent._screenXY.y+this.offset.y;    //+parent.borderWidth;
         }
+
+        //const ox=this.w*this.origin.x+this.originOffset.x;
+        //const oy=this.h*this.origin.y+this.originOffset.y;
+        //this._local.rotate.SetRotate(this.rotate);
+        //this._local.scale=this.scale;
+        //this._world=(parent)?parent._world.Multiply(this._local):this._local;
+
+        x1+=px;
+        y1+=py;
+        x2+=px;
+        y2+=py;
         x1=Math.round(x1);
         x2=Math.round(x2);
         y1=Math.round(y1);
@@ -1633,32 +1436,32 @@ export class zlUIWin
     GetNotify(pos:ImGui.ImVec2):zlUIWin
     {
         if(this.isDisable)
-            return null;
+            return undefined;
         if(!this.isVisible)
-            return null;
+            return undefined;
         if(!Inside(pos, this._screenXY, this._screenMax))
-            return null;
+            return undefined;
         for(let i=this.pChild.length-1;i>=0;i--) {
             let n=this.pChild[i].GetNotify(pos);
             if(n) return n;
         }
         if(!this.isCanNotify)
-            return null;
+            return undefined;
         return this;
     }
     GetUIWin(pos:ImGui.ImVec2, csid:string):zlUIWin
     {
         if(this.isDisable)
-            return null;
+            return undefined;
         if(!this.isVisible)
-            return null;
+            return undefined;
         if(!Inside(pos, this._screenXY, this._screenMax))
-            return null;
+            return undefined;
         for(let i=this.pChild.length-1;i>=0;i--) {
             let n=this.pChild[i].GetUIWin(pos, csid);
             if(n) return n;
         }
-        return (this._csid==csid)?this:null;        
+        return (this._csid==csid)?this:undefined;        
     }
 
     OnNotify():void { if(this.on_notify) this.on_notify(this);}
@@ -1667,17 +1470,17 @@ export class zlUIWin
     {
         name=name.toLowerCase();
         if(this.isDisable)
-            return null;
+            return undefined;
         if(this.Name && this.Name==name)
             return this;
         if(!this.pChild)
-            return null;
+            return undefined;
         for(let i=0;i<this.pChild.length;i++)    {
             let found=this.pChild[i].GetUI(name);
             if(found)
                 return found;
         }
-        return null;
+        return undefined;
     }
     AddChild(obj:zlUIWin):void
     {
@@ -1690,7 +1493,7 @@ export class zlUIWin
         if(this.pChild.length>0)    {
             return this.pChild[this.pChild.length-1];
         }
-        return null;
+        return undefined;
     }
     HasChild(obj:zlUIWin):boolean
     {
@@ -1737,7 +1540,11 @@ export class zlUIWin
     autosize:EAutosize=EAutosize.None;    
     hint:string;
     alpha:number=1;
-    origin:Vec2;
+
+    rotate:number=0;
+    scale:number=1;
+    origin:Vec2={x:0.5, y:0.5};
+    originOffset:Vec2;
 
     _csid:string;
     _owner:zlUIMgr;
@@ -1813,7 +1620,7 @@ export class zlUIImage extends zlUIWin
         return image;
     }
 
-    Paint(drawlist:ImGui.ImDrawList, parent:zlUIWin):void 
+    Paint(drawlist:ImGui.ImDrawList):void 
     {
         if(this.image)  {
             let im=this.image;
@@ -1827,7 +1634,7 @@ export class zlUIImage extends zlUIWin
                     this.rounding, this.roundingCorner);
             }
         }
-        super.Paint(drawlist, parent);
+        super.Paint(drawlist);
     }
 
     set Image(name:string) {this.SetImage(name);}
@@ -2127,10 +1934,10 @@ export class zlUIPanel extends zlUIImage
         }
     }
 
-    Paint(drawlist:ImGui.ImDrawList, parent:zlUIWin):void 
+    Paint(drawlist:ImGui.ImDrawList):void 
     {
         this.PaintPanel(drawlist);
-        super.Paint(drawlist, parent);
+        super.Paint(drawlist);
     }
 
     SetText(text:string):void
@@ -2554,13 +2361,13 @@ export class zlUIButton extends zlUIPanel
         }
     }
 
-    Paint(drawlist:ImGui.ImDrawList, parent:zlUIWin):void 
+    Paint(drawlist:ImGui.ImDrawList):void 
     {
         if(this.isPaintButton)  {
             this.PaintButton();
         }
         this.PaintTextColor();
-        super.Paint(drawlist, parent);
+        super.Paint(drawlist);
     }
     GetNotify(pos:ImGui.ImVec2):zlUIWin
     {
@@ -2678,12 +2485,12 @@ export class zlUICheck extends zlUIButton
             this.textColor=this.textColorUp;
         }
     }
-    Paint(drawlist:ImGui.ImDrawList, parent:zlUIWin):void 
+    Paint(drawlist:ImGui.ImDrawList):void 
     {
         if(!this.isEnable) {
             this.color=this.colorDisable;
         }        
-        super.Paint(drawlist, parent);
+        super.Paint(drawlist);
         if(this.isDrawCheck)    {
             drawlist.AddRect(this.checkmark_xy, this.checkmark_max,
                 this.borderColor, this.rounding, 
@@ -2762,9 +2569,9 @@ export class zlUICombo extends zlUIButton
         obj.Copy(this);
         return obj;
     }
-    Paint(drawlist: ImGui.ImDrawList, parent: zlUIWin): void 
+    Paint(drawlist: ImGui.ImDrawList): void 
     {
-        super.Paint(drawlist, parent);
+        super.Paint(drawlist);
         if(this.isDrawCombo) {
             RenderArrow(drawlist, this.arrow_xy, this.textColor, ImGui.ImGuiDir.Down, 16, 1);
         }
@@ -3008,9 +2815,9 @@ export class zlUISlider extends zlUIPanel
         }
         super.Refresh(ti, parent);
     }
-    Paint(drawlist:ImGui.ImDrawList, parent:zlUIWin):void 
+    Paint(drawlist:ImGui.ImDrawList):void 
     {
-        super.Paint(drawlist, parent);
+        super.Paint(drawlist);
 
         let drawBar=false;
         if(this._owner.slider)  {
@@ -3162,10 +2969,10 @@ export class zlUIImageText extends zlUIWin
         return obj;
     }
 
-    Paint(drawlist:ImGui.ImDrawList, parent:zlUIWin):void 
+    Paint(drawlist:ImGui.ImDrawList):void 
     {
 
-        super.Paint(drawlist, parent);
+        super.Paint(drawlist);
     }
 
     SetText(text:string):void
@@ -4069,7 +3876,7 @@ export class zlUIMgr extends zlUIWin
 {
     constructor()
     {
-        super(null)
+        super(undefined)
         this._owner=this;
         this.track=new zlTrackMgr(this);
     }
@@ -4132,7 +3939,7 @@ export class zlUIMgr extends zlUIWin
     {
         if(this.texture)    {
             this.texture.Destroy();
-            this.texture=null;
+            this.texture=undefined;
         }
     }
 
@@ -4187,10 +3994,10 @@ export class zlUIMgr extends zlUIWin
             return new zlUISlider(this);
         default:
             console.log("zlUIMgr unknow object " + name);
-            return null;
+            return undefined;
         }
     }
-    Refresh(ti:number, parent:zlUIWin=null):void 
+    Refresh(ti:number, parent?:zlUIWin):void 
     {
         this.hover_slider=this.GetUIWin(this.mouse_pos, "Slider");
         let notify=this.GetNotify(this.mouse_pos);
@@ -4259,13 +4066,13 @@ export class zlUIMgr extends zlUIWin
             }
         }
         if(!isDown) {
-            this.drag=null;
+            this.drag=undefined;
         }
         this.track.Refresh(ti);
 
         this.refresh_count=0;
         this.calrect_count=0;
-        super.Refresh(ti, null);
+        super.Refresh(ti, undefined);
         if(this.nextEdit) {
             this.NextEdit(this.nextEdit);
             this.nextEdit=undefined;
@@ -4283,9 +4090,9 @@ export class zlUIMgr extends zlUIWin
         }
     }
 
-    Paint(drawlist: ImGui.ImDrawList, parent?: zlUIWin): void {
+    Paint(drawlist: ImGui.ImDrawList): void {
         this.paint_count=0;
-        super.Paint(drawlist, this);
+        super.Paint(drawlist);
     }
 
     ScaleWH(w:number, h:number, mode:ScaleMode):void 
@@ -4326,9 +4133,12 @@ export class zlUIMgr extends zlUIWin
     }
     GetTexture(name:string):TexturePack
     {
+        if(!this.texture)
+            return undefined;
         let img=this.texture.cache[name.toLowerCase()];
         if(!img) {
             console.log("texture not found " + name);
+            return undefined;
         }
         return img;
     }
@@ -4344,7 +4154,7 @@ export class zlUIMgr extends zlUIWin
             if(this.on_popup_closed) {
                 this.on_popup_closed(this.popup);
             }
-            this.popup=null;
+            this.popup=undefined;
         }
     }    
     NextEdit(current:zlUIEdit)
@@ -4353,14 +4163,16 @@ export class zlUIMgr extends zlUIWin
         let list:zlUIEdit[]=[];
         while(wait.length>0) {
             let win=wait.shift();
-            for(let ch of win.pChild) {
-                if(!ch.isVisible||!ch._isPaintout)
-                {
-                    continue;
-                }
-                wait.push(ch);
-                if(ch instanceof zlUIEdit) {
-                    list.push(ch);
+            if(win) {
+                for(let ch of win.pChild) {
+                    if(!ch.isVisible||!ch._isPaintout)
+                    {
+                        continue;
+                    }
+                    wait.push(ch);
+                    if(ch instanceof zlUIEdit) {
+                        list.push(ch);
+                    }
                 }
             }
         }
@@ -4403,7 +4215,7 @@ export class zlUIMgr extends zlUIWin
         if(this.clip_stack.length>0) {
             return this.clip_stack[this.clip_stack.length-1];
         }
-        return null;
+        return undefined;
     }
 
     path:string;

@@ -10,6 +10,7 @@ Clone Panel
     Anchor xy 0.5 0.4
     Padding 10
     Rounding 10
+    Color4 0xff112233 0xff112233 0xff112233 0xff222233
 
     TextAnchor xy 0.5 0
     Text Login
