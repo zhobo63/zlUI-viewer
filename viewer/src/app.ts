@@ -29,7 +29,8 @@ export class App
         ui.mouse_wheel=io.MouseWheel;
         ui.Refresh(io.DeltaTime);
         ui.Paint(drawlist);
-        if(ui.track.is_play) {
+        if(ui.refresh_count>0)  {
+        //if(ui.track.is_play) {
             this.isDirty=true;
         }
 
