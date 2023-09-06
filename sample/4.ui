@@ -1,0 +1,15 @@
+DefaultScreenSize 1920 1080
+ScaleMode stretch
+
+ifnot DarkTheme include dark.ui
+
+Clone Panel
+{
+    RectWH 0 0 1920 1080
+    Text 123
+
+    Clone Button
+    {
+        RectWH 100 100 200 30
+    }
+}

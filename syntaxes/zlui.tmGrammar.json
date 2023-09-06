@@ -40,7 +40,7 @@
         "global_function":{
             "patterns":[
                 {
-                    "match": "\\b(Font|include|DefaultBorderWidth|DefaultScreenSize|DefaultPanelColor|LoadPackImage|DefaultComboMenu|DefaultComboItem|MergeFont|CreateFont)\\b",
+                    "match": "\\b(Font|include|DefaultBorderWidth|DefaultScreenSize|DefaultPanelColor|LoadPackImage|DefaultComboMenu|DefaultComboItem|MergeFont|CreateFont|ScaleMode)\\b",
                     "name": "variable.global_function"
                 }
             ]
@@ -87,6 +87,7 @@
                     "match": "\\b(SetPos|SetRect|SetWidth|SetHeight|Move|MoveLerp|MoveBezier|SetX|MoveX|MoveXLerp|SetY|MoveY|MoveYLerp|SetScale|Scale|ScaleLerp|Image|SetAlpha|Alpha|AlphaLerp|Hide|Show|FlipW|FlipH|SetRotate|Rotate|RotateLerp|SetColor|Color|ColorLerp|Width|WidthLerp|Height|HeightLerp|StopAni|PlayAni|AniSpeed|AniStartEnd|PlaySound|SoundFade|Volume|SetImageClip|ImageClip|ImageClipLerp|PlayTrack|StopTrack|Enable|Disable|Text)\\b",
                     "name": "constant.numeric.track"
                 }
+
             ]
         },
         "parameter":{
@@ -126,6 +127,10 @@
                 {
                     "match": "\\b(item|content|horizon|vertical)\\b",
                     "name": "keyword.control.arrange"
+                },
+                {
+                    "match": "\\b(stretch|aspectratio)\\b",
+                    "name": "keyword.control.scalemode"
                 },
                 {
                     "match": "\\\\u([\\d\\w]{4})|\\\\s|\\\\n",

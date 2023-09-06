@@ -1,5 +1,5 @@
 import { ImGui,ImGui_Impl } from "@zhobo63/imgui-ts";
-import { zlUIMgr } from "@zhobo63/zlui-ts";
+import { ScaleMode, zlUIMgr } from "@zhobo63/zlui-ts";
 
 export class App
 {
@@ -15,8 +15,9 @@ export class App
 
     onResize(w:number, h:number)
     {
-        this.ui.w=w;
-        this.ui.h=h;
+        this.w=w;
+        this.h=h;
+        this.ui.OnResize(w,h);
         this.ui.SetCalRect();
     }
 
@@ -46,7 +47,9 @@ export class App
                     this.ui.path+="/";
                 }
                 this.ui.pChild=[];
+                this.ui.scale_mode=ScaleMode.None;
                 await this.ui.Parse(msg.document.split(/\r\n|\n/), 0);
+                this.ui.OnResize(this.w, this.h);
                 this.ui.SetCalRect();
                 console.log(this.ui);
             }
@@ -56,5 +59,7 @@ export class App
 
     isDirty:boolean=false;
     ui:zlUIMgr;
+    w:number;
+    h:number;
 };
 

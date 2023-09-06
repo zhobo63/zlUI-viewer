@@ -42,16 +42,6 @@ function anyPointer(e:Event)
 }
 
 window.addEventListener('DOMContentLoaded', async () =>{
-    /*
-    let fontface=new FontFace("FontAwesome",
-     "url(res/fa-solid-900.woff2) format(woff2)", {
-     });
-    await fontface.load().then(r=>{
-        console.log("FontFace loaded!", r);
-    });
-    document.fonts.add(fontface);
-    */
-
     await ImGui.default();
     ImGui.CHECKVERSION();
     ImGui.CreateContext();
@@ -63,11 +53,6 @@ window.addEventListener('DOMContentLoaded', async () =>{
     if(ImGui.isMobile.any())    {
         font.FontSize=20;
     }
-    /*
-    let font2=ImGui.CreateFont("FontAwesome", font.FontSize, "bold");
-    font2.AddFontRange(0xf000, 0xffff);
-    font.MergeFont(font2);
-    */
 
     const canvas:HTMLCanvasElement=document.getElementById('canvas') as HTMLCanvasElement;
     ImGui_Impl.Init(canvas);
@@ -77,12 +62,6 @@ window.addEventListener('DOMContentLoaded', async () =>{
 
     app=new App;
     await app.initialize();
-    /*
-    if(window.location.search=="?id=adminclient")   {
-    }else if(window.location.search=="?id=kiosk")   {
-    }else {
-    }
-    */
     if(app) {
         app.onResize(canvas.scrollWidth, canvas.scrollHeight);
     }
