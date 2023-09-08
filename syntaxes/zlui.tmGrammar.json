@@ -40,7 +40,7 @@
         "global_function":{
             "patterns":[
                 {
-                    "match": "\\b(Font|include|DefaultBorderWidth|DefaultScreenSize|DefaultPanelColor|LoadPackImage|DefaultComboMenu|DefaultComboItem|MergeFont|CreateFont|ScaleMode)\\b",
+                    "match": "\\b(Font|include|DefaultBorderWidth|DefaultScreenSize|DefaultPanelColor|LoadPackImage|DefaultComboMenu|DefaultComboItem|MergeFont|CreateFont|ScaleMode|DefaultHintPanel)\\b",
                     "name": "variable.global_function"
                 }
             ]
