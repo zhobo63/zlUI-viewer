@@ -32,7 +32,7 @@
         "object_type": {
             "patterns": [
                 {
-                    "match": "\\b(Win|Panel|Image|Button|Check|Combo|Edit|Slider|ImageText)\\b",
+                    "match": "\\b(Win|Panel|Image|Button|Check|Combo|Edit|Slider|ImageText|TreeNode|Tree)\\b",
                     "name": "variable.object_type"
                 }
             ]
@@ -48,7 +48,7 @@
         "parameter_win":{
             "patterns":[
                 {
-                    "match":"\\b(Name|RectWH|Top|Y|Left|X|Width|W|Height|H|Align|Visible|Notify|Drag|Autosize|AutoHeight|Padding|Anchor|Dock|Margin|Offset|Clip|Arrange|Hint|Mergin|Origin)\\b",
+                    "match":"\\b(Name|RectWH|Top|Y|Left|X|Width|W|Height|H|Align|Visible|Notify|Drag|Autosize|AutoHeight|Padding|Anchor|Dock|Margin|Offset|Clip|Arrange|Hint|Mergin|Origin|DockOffset)\\b",
                     "name":"constant.numeric.win"
                 },
                 {
@@ -131,6 +131,10 @@
                 {
                     "match": "\\b(stretch|aspectratio)\\b",
                     "name": "keyword.control.scalemode"
+                },
+                {
+                    "match": "\\b(singleSelect)\\b",
+                    "name": "keyword.control.tree"
                 },
                 {
                     "match": "\\\\u([\\d\\w]{4})|\\\\s|\\\\n",

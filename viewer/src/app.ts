@@ -1,5 +1,5 @@
 import { ImGui,ImGui_Impl } from "@zhobo63/imgui-ts";
-import { ScaleMode, zlUIMgr } from "@zhobo63/zlui-ts";
+import { Parser, ScaleMode, zlUIMgr } from "@zhobo63/zlui-ts";
 
 export class App
 {
@@ -48,7 +48,7 @@ export class App
                 }
                 this.ui.pChild=[];
                 this.ui.scale_mode=ScaleMode.None;
-                await this.ui.Parse(msg.document.split(/\r\n|\n/), 0);
+                await this.ui.Parse(new Parser(msg.document));
                 this.ui.OnResize(this.w, this.h);
                 this.ui.SetCalRect();
                 console.log(this.ui);
