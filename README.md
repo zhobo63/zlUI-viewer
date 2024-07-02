@@ -238,6 +238,14 @@ Object Win
     Hint
 
     /*
+    Drag Drop
+    only DragType match DropType
+    */
+    DragDrop bool
+    DragType number
+    DropType number
+
+    /*
     when arrange children, next child start with margin space
     */
     Margin x y
