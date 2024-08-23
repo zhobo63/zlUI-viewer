@@ -6,7 +6,11 @@ zlUI is a simple scripted ui system that with a single zlUI.ts file.
 
 <img src="https://zhobo63.github.io/zlui/ezgif-5-ed5913f05c.gif">
 
-### Abount the Extension 
+### Update History
+
+F2 show/hide Inspector
+
+### About the Extension 
 
 Preview zlUI, default file ext: *.ui
 

@@ -17,12 +17,12 @@
   "devDependencies": {
     "@webpack-cli/generators": "^3.0.7",
     "@zhobo63/imgui-ts": "^0.1.45",
-    "@zhobo63/zlui-ts": "^0.1.26",
+    "@zhobo63/zlui-ts": "^0.1.27",
     "devtool": "^2.3.1",
     "prettier": "^2.8.8",
     "ts-loader": "^9.5.1",
     "typescript": "^5.5.4",
-    "webpack": "^5.93.0",
+    "webpack": "^5.94.0",
     "webpack-cli": "^5.1.4"
   }
 }

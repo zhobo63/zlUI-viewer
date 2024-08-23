@@ -1,11 +1,16 @@
 import { ImGui,ImGui_Impl } from "@zhobo63/imgui-ts";
-import { Parser, ScaleMode, zlUIMgr } from "@zhobo63/zlui-ts";
+import { InspectorUI, Parser, ScaleMode, zlUIMgr } from "@zhobo63/zlui-ts";
 
 export class App
 {
     constructor()
     {
-
+        window.addEventListener("keydown", (event: KeyboardEvent)=>{
+            console.log(event);
+            if(event.keyCode==113)  {
+                this.isInspector=!this.isInspector;
+            }
+        });
     }
 
     async initialize():Promise<any>
@@ -34,7 +39,15 @@ export class App
         //if(ui.track.is_play) {
             this.isDirty=true;
         }
-
+        if(this.isInspector) {
+            ImGui.Begin("Inspector");
+            ImGui.Text("F2 show/hide Inspector");
+            if(ImGui.TreeNodeEx("UIMgr", ImGui.ImGuiTreeNodeFlags.DefaultOpen)) {
+                InspectorUI(ui, 1);
+                ImGui.TreePop();
+            }
+            ImGui.End();
+        }
     }
     async onMessage(msg:any)
     {
@@ -54,10 +67,13 @@ export class App
                 console.log(this.ui);
             }
             break;
+        case "inspector":
+            break;
         }
     }
 
     isDirty:boolean=false;
+    isInspector:boolean=true;
     ui:zlUIMgr;
     w:number;
     h:number;
