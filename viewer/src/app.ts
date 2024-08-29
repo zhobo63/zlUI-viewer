@@ -40,8 +40,15 @@ export class App
             this.isDirty=true;
         }
         if(this.isInspector) {
-            ImGui.Begin("Inspector");
+            ImGui.Begin("Inspector");            
             ImGui.Text("F2 show/hide Inspector");
+            ImGui.Indent();
+            ImGui.Text("Notify:" + (ui.notify?"["+ui.notify.line+"]"+ ui.notify.Name:""));
+            ImGui.Text("Hover:" + (ui.hover?"["+ui.hover.line+"]"+ ui.hover.Name:""));
+            ImGui.Text("Refresh Count:"+ui.refresh_count);
+            ImGui.Text("Paint Count:"+ui.paint_count);
+            ImGui.Text("CalRect Count:"+ui.calrect_count);
+            ImGui.Unindent();
             if(ImGui.TreeNodeEx("UIMgr", ImGui.ImGuiTreeNodeFlags.DefaultOpen)) {
                 InspectorUI(ui, 1);
                 ImGui.TreePop();
