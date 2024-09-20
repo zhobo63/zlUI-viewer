@@ -48,7 +48,7 @@
         "parameter_win":{
             "patterns":[
                 {
-                    "match":"\\b(Name|RectWH|Top|Y|Left|X|Width|W|Height|H|Align|Visible|Notify|Drag|Autosize|AutoHeight|Padding|Anchor|Dock|Margin|Offset|Clip|Arrange|Hint|Mergin|Origin|DockOffset|DragDrop|DragType|DropType)\\b",
+                    "match":"\\b(Name|RectWH|Top|Y|Left|X|Width|W|Height|H|Align|Visible|Notify|Drag|Autosize|AutoHeight|Padding|Anchor|Dock|Margin|Offset|Clip|Arrange|Hint|Mergin|Origin|OriginOffset|DockOffset|Scale|Rotate|DragDrop|DragType|DropType|Disable|Enable|if|ifnot)\\b",
                     "name":"constant.numeric.win"
                 },
                 {
@@ -72,7 +72,7 @@
                     "name":"constant.numeric.check"
                 },
                 {
-                    "match":"\\b(ComboItems|ComboValue)\\b",
+                    "match":"\\b(ComboItems|ComboValue|PopupWidth)\\b",
                     "name":"constant.numeric.combo"
                 },
                 {
@@ -84,7 +84,15 @@
                     "name":"constant.numeric.imagetext"
                 },
                 {
-                    "match": "\\b(SetPos|SetRect|SetWidth|SetHeight|Move|MoveLerp|MoveBezier|SetX|MoveX|MoveXLerp|SetY|MoveY|MoveYLerp|SetScale|Scale|ScaleLerp|Image|SetAlpha|Alpha|AlphaLerp|Hide|Show|FlipW|FlipH|SetRotate|Rotate|RotateLerp|SetColor|Color|ColorLerp|Width|WidthLerp|Height|HeightLerp|StopAni|PlayAni|AniSpeed|AniStartEnd|PlaySound|SoundFade|Volume|SetImageClip|ImageClip|ImageClipLerp|PlayTrack|StopTrack|Enable|Disable|Text)\\b",
+                    "match":"\\b(TreeNode|OffsetX|offset_x)\\b",
+                    "name":"constant.numeric.treenode"
+                },
+                {
+                    "match":"\\b(SingleSelect|DefaultTreeNode)\\b",
+                    "name":"constant.numeric.tree"
+                },
+                {
+                    "match": "\\b(SetPos|SetRect|SetWidth|SetHeight|Move|MoveLerp|MoveBezier|SetX|MoveX|MoveXLerp|SetY|MoveY|MoveYLerp|SetScale|Scale|ScaleLerp|Image|SetAlpha|Alpha|AlphaLerp|Hide|Show|FlipW|FlipH|SetRotate|Rotate|RotateLerp|SetColor|Color|ColorLerp|Width|WidthLerp|Height|HeightLerp|StopAni|PlayAni|AniSpeed|AniStartEnd|PlaySound|SoundFade|Volume|SetImageClip|ImageClip|ImageClipLerp|PlayTrack|StopTrack|Enable|Disable|Text|SetTextColor|TextColor|TextColorLerp)\\b",
                     "name": "constant.numeric.track"
                 }
 
@@ -125,7 +133,7 @@
                     "name": "keyword.control.dock"
                 },
                 {
-                    "match": "\\b(item|content|horizon|vertical)\\b",
+                    "match": "\\b(item|content|horizon|vertical|row)\\b",
                     "name": "keyword.control.arrange"
                 },
                 {

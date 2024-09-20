@@ -1,6 +1,8 @@
 import { ImGui,ImGui_Impl } from "@zhobo63/imgui-ts";
 import { InspectorUI, Parser, ScaleMode, zlUIMgr } from "@zhobo63/zlui-ts";
 
+const vscode=acquireVsCodeApi();
+
 export class App
 {
     constructor()
@@ -16,6 +18,14 @@ export class App
     async initialize():Promise<any>
     {
         this.ui=new zlUIMgr;
+        this.ui.on_click=(obj)=>{
+            
+            vscode.postMessage({
+                cmd:"click",
+                line:obj.line,
+                version:1
+            })
+        }
     }
 
     onResize(w:number, h:number)
@@ -58,7 +68,7 @@ export class App
     }
     async onMessage(msg:any)
     {
-        console.log(msg);
+        console.log("onMessage", msg);
         switch(msg.cmd) {
         case "update":
             if(msg.document) {

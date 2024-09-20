@@ -4,14 +4,16 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 
+const version="001"
+
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
-	console.log('Congratulations, your extension "zlui-viewer" is now active!');
+	console.log("zlui-viewer " + version + " is now active!");
 
 	let disposable = vscode.commands.registerCommand('zlui-viewer.show', () => {		
-		vscode.window.showInformationMessage('show zlUI-Viewer!');
+		vscode.window.showInformationMessage('show zlUI-Viewer ' + version);
 		UIPreviewPanel.show(context, undefined);
 	});
 
@@ -65,7 +67,6 @@ class UIPreviewPanel {
 
 		console.log(localResourceRoots);
 
-
 		this.panel = vscode.window.createWebviewPanel(
 			"zlui.preview",
 			"zlUI-Preview",
@@ -83,7 +84,7 @@ class UIPreviewPanel {
 		const mainjsUri = this.panel.webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'www/js', 'main.js'));
 		html=html.replace("js/main.js", `${mainjsUri}`);
 
-		console.log(html);
+		//console.log(html);
 		this.panel.webview.html = html;
 
 		vscode.workspace.onDidSaveTextDocument((doc)=>{
@@ -106,21 +107,39 @@ class UIPreviewPanel {
 
 	update(doc:vscode.TextDocument)
 	{
+		console.log("UIPreviewPanel Update");		
+		let editor=vscode.window.activeTextEditor;
+
 		let dir=this.panel?.webview.asWebviewUri(doc.uri);
-		console.log("UIPreviewPanel Update");
 		this.panel?.webview.postMessage({
 			cmd:"update",
 			document:doc.getText(),
 			filename:doc.fileName,
 			path:path.dirname(`${dir}`)
 			});
+		this.panel?.webview.onDidReceiveMessage((e)=>{
+			console.log("onDidReceiveMessage", e);
+			switch(e.cmd) {
+			case 'click':
+				let range=doc.lineAt(e.line).range;
+				console.log(editor?.document);
+				if(editor && range) {
+					//editor.selection=new vscode.Selection(range.start, range.end);
+					editor.revealRange(range, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
+					//console.log(doc.getText());
+					console.log("range", range);
+				}
+				break;
+			}
+		})
 	}
 
 	watchFile()
 	{
-		let doc=vscode.window.activeTextEditor?.document;
-		if(!doc)
+		let doc=vscode.window.activeTextEditor?.document;		
+		if(!doc) {
 			return;
+		}
 		let path=doc.fileName;
 		if(path && doc) {
 			this.watchers?.push(fs.watch(path, ()=>{
