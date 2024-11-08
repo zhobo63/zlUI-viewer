@@ -2,7 +2,7 @@
   "name": "zlui-viewer",
   "displayName": "zlUI Viewer",
   "description": "preview ui format",
-  "version": "0.0.33",
+  "version": "0.0.35",
   "publisher": "zho63212",
   "engines": {
     "vscode": "^1.81.0"
@@ -60,7 +60,7 @@
     "@types/glob": "^8.1.0",
     "@types/mocha": "^10.0.9",
     "@types/node": "20.2.5",
-    "@types/vscode": "^1.94.0",
+    "@types/vscode": "^1.81.0",
     "@typescript-eslint/eslint-plugin": "^6.4.0",
     "@typescript-eslint/parser": "^6.4.0",
     "@vscode/test-electron": "^2.4.1",
