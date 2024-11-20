@@ -2,7 +2,7 @@
   "name": "zlui-viewer",
   "displayName": "zlUI Viewer",
   "description": "preview ui format",
-  "version": "0.0.35",
+  "version": "0.0.36",
   "publisher": "zho63212",
   "engines": {
     "vscode": "^1.81.0"
