@@ -32,7 +32,7 @@
         "object_type": {
             "patterns": [
                 {
-                    "match": "\\b(Win|Panel|Image|Button|Check|Combo|Edit|Slider|ImageText|TreeNode|Tree)\\b",
+                    "match": "\\b(Win|Panel|Image|Button|Check|Combo|Edit|Slider|ImageText|TreeNode|Tree|EditItem|Particle|Spine)\\b",
                     "name": "variable.object_type"
                 }
             ]
@@ -40,7 +40,7 @@
         "global_function":{
             "patterns":[
                 {
-                    "match": "\\b(Font|include|DefaultBorderWidth|DefaultScreenSize|DefaultPanelColor|LoadPackImage|DefaultComboMenu|DefaultComboItem|MergeFont|CreateFont|ScaleMode|DefaultHintPanel)\\b",
+                    "match": "\\b(Font|include|DefaultBorderWidth|DefaultScreenSize|DefaultPanelColor|LoadPackImage|LoadImage|DefaultComboMenu|DefaultComboItem|MergeFont|CreateFont|ScaleMode|DefaultHintPanel)\\b",
                     "name": "variable.global_function"
                 }
             ]
@@ -90,6 +90,18 @@
                 {
                     "match":"\\b(SingleSelect|DefaultTreeNode)\\b",
                     "name":"constant.numeric.tree"
+                },
+                {
+                    "match":"\\b(Label|LabelWidth|Value|Type)\\b",
+                    "name":"constant.numeric.edititem"
+                },
+                {
+                    "match":"\\b(Image|ParticleCount|TimeStart|TimeEnd|Speed|SpeedVar|Life|LifeVar|Dir|DirVar|Size|SizeVar|Rot|RotVar|Mass|MassVar|Color|Source|Force|Emitter|Blend|Shape)\\b",
+                    "name":"constant.numeric.particle"
+                },
+                {
+                    "match":"\\b(Ani|PremultipledAlpha|Spine)\\b",
+                    "name":"constant.numeric.spine"
                 },
                 {
                     "match": "\\b(SetPos|SetRect|SetWidth|SetHeight|Move|MoveLerp|MoveBezier|SetX|MoveX|MoveXLerp|SetY|MoveY|MoveYLerp|SetScale|Scale|ScaleLerp|Image|SetAlpha|Alpha|AlphaLerp|Hide|Show|FlipW|FlipH|SetRotate|Rotate|RotateLerp|SetColor|Color|ColorLerp|Width|WidthLerp|Height|HeightLerp|StopAni|PlayAni|AniSpeed|AniStartEnd|PlaySound|SoundFade|Volume|SetImageClip|ImageClip|ImageClipLerp|PlayTrack|StopTrack|Enable|Disable|Text|SetTextColor|TextColor|TextColorLerp)\\b",
@@ -143,6 +155,22 @@
                 {
                     "match": "\\b(singleSelect)\\b",
                     "name": "keyword.control.tree"
+                },
+                {
+                    "match": "\\b(zero|one|srccolor|invsrccolor|srcalpha|invsrcalpha|dstalpha|invdstalpha|dstcolor|invdstcolor|srcalphasaturate)\\b",
+                    "name": "keyword.control.blend"
+                },
+                {
+                    "match": "\\b(point|rect|circle)\\b",
+                    "name": "keyword.control.emitter"
+                },
+                {
+                    "match": "\\b(point|line|rect|quad)\\b",
+                    "name": "keyword.control.shape"
+                },
+                {
+                    "match": "\\b(acceler|push|gravity|twirl|rotate|wave|friction|spin|resize|point|rect|circle|speed)\\b",
+                    "name": "keyword.control.particle"
                 },
                 {
                     "match": "\\\\u([\\d\\w]{4})|\\\\s|\\\\n",

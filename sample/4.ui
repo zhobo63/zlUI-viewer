@@ -1,15 +1,55 @@
 DefaultScreenSize 1920 1080
-ScaleMode stretch
+ScaleMode aspectratio
+//Origin 0 0
 
 ifnot DarkTheme include dark.ui
 
 Clone Panel
 {
+    Name pnl_bg
     RectWH 0 0 1920 1080
     Text 123
 
     Clone Button
     {
+        Name btn_ok
         RectWH 100 100 200 30
+        Text OK
+    }
+
+    Clone Panel
+    {
+        Name pnl_arrange
+        RectWH 100 150 400 200
+        Arrange vertical content
+        Padding 10
+
+        Clone Text
+        {
+            Name txt1
+            Dock left|right 0 0 1 1
+            Autosize textHeight
+            TextAnchor xy 0 0
+            Multiline true
+            Text 這個是第一航會自動換行
+        }
+        Clone txt1
+        {
+            Name txt2
+            TextColor RGB(100,200,200)
+            Text Next line is going to
+        }
+    }
+
+    Object Particle
+    {
+        Name prt
+        RectWH 100 400 200 200
+        Size 5
+        SizeVar 5
+        Life 1
+        Dir -90
+        DirVar 60
+        Force acceler 0 200
     }
 }

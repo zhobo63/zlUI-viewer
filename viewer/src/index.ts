@@ -24,7 +24,7 @@ function _loop(time:number):void {
     ImGui.NewFrame();
 
     if(app) {
-        app.mainLoop(time, ImGui.GetBackgroundDrawList());
+        app.mainLoop(time);
     }
 
     ImGui.EndFrame();

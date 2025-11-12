@@ -1,5 +1,7 @@
 import { ImGui,ImGui_Impl } from "@zhobo63/imgui-ts";
-import { InspectorUI, Parser, ScaleMode, zlUIMgr } from "@zhobo63/zlui-ts";
+import { Parser, ScaleMode, zlUIMgr } from "@zhobo63/zlui-ts";
+import { InspectorUI, BackendImGui } from "@zhobo63/zlui-ts/src/BackendImGui";
+import * as SPINE from "@zhobo63/zlui-ts-spine/src/zlUISpine";
 
 const vscode=acquireVsCodeApi();
 
@@ -18,6 +20,8 @@ export class App
     async initialize():Promise<any>
     {
         this.ui=new zlUIMgr;
+        this.ui.backend=new BackendImGui(ImGui.GetBackgroundDrawList());
+        SPINE.Renderer.Register(this.ui, "");
         this.ui.on_click=(obj)=>{
             
             vscode.postMessage({
@@ -33,18 +37,18 @@ export class App
         this.w=w;
         this.h=h;
         this.ui.OnResize(w,h);
-        this.ui.SetCalRect();
+        SPINE.spineRenderer.OnResize(w, h);
     }
 
-    mainLoop(time:number, drawlist:ImGui.DrawList)
+    mainLoop(time:number)
     {
         let io=ImGui.GetIO();
         let ui=this.ui;
         ui.any_pointer_down=(!ImGui.GetHoveredWindow())?ImGui_Impl.any_pointerdown():false;
-        ui.mouse_pos=io.MousePos;
+        ui.mouse_pos.Set(io.MousePos.x, io.MousePos.y);
         ui.mouse_wheel=io.MouseWheel;
         ui.Refresh(io.DeltaTime);
-        ui.Paint(drawlist);
+        ui.Paint();
         if(ui.refresh_count>0 || ui.track.is_play)  {
             this.isDirty=true;
         }

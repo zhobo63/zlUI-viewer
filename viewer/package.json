@@ -17,13 +17,14 @@
   "devDependencies": {
     "@types/vscode-webview": "^1.57.5",
     "@webpack-cli/generators": "^3.0.7",
-    "@zhobo63/imgui-ts": "^0.1.46",
-    "@zhobo63/zlui-ts": "^0.1.34",
+    "@zhobo63/imgui-ts": "^0.1.50",
+    "@zhobo63/zlui-ts": "^0.1.41",
+    "@zhobo63/zlui-ts-spine": "^0.1.0",
     "devtool": "^2.3.1",
     "prettier": "^2.8.8",
-    "ts-loader": "^9.5.1",
-    "typescript": "^5.6.3",
-    "webpack": "^5.96.1",
+    "ts-loader": "^9.5.4",
+    "typescript": "^5.9.3",
+    "webpack": "^5.102.1",
     "webpack-cli": "^5.1.4"
   }
 }

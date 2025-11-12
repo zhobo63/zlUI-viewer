@@ -2,7 +2,7 @@
   "name": "zlui-viewer",
   "displayName": "zlUI Viewer",
   "description": "preview ui format",
-  "version": "0.0.36",
+  "version": "0.0.41",
   "publisher": "zho63212",
   "engines": {
     "vscode": "^1.81.0"
@@ -67,9 +67,9 @@
     "eslint": "^8.47.0",
     "glob": "^8.1.0",
     "mocha": "^10.2.0",
-    "ts-loader": "^9.5.1",
+    "ts-loader": "^9.5.4",
     "typescript": "^5.6.3",
-    "webpack": "^5.95.0",
+    "webpack": "^5.101.3",
     "webpack-cli": "^5.1.4"
   }
 }
