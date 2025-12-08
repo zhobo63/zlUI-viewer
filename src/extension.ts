@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 
-const version="001"
+const version="0.1.49"
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed

@@ -93,7 +93,7 @@ export class App
     }
 
     isDirty:boolean=false;
-    isInspector:boolean=true;
+    isInspector:boolean=false;
     ui:zlUIMgr;
     w:number;
     h:number;

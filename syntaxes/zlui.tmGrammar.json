@@ -32,7 +32,7 @@
         "object_type": {
             "patterns": [
                 {
-                    "match": "\\b(Win|Panel|Image|Button|Check|Combo|Edit|Slider|ImageText|TreeNode|Tree|EditItem|Particle|Spine)\\b",
+                    "match": "\\b(Win|Panel|Image|Button|Check|Combo|Edit|Slider|ImageText|TreeNode|Tree|LabelEdit|Particle|Spine)\\b",
                     "name": "variable.object_type"
                 }
             ]
@@ -60,7 +60,7 @@
                     "name":"constant.numeric.panel"
                 },
                 {
-                    "match":"\\b(Password|MaxLength)\\b",
+                    "match":"\\b(Password|MaxLength|Accept|Type|Range|Value)\\b",
                     "name":"constant.numeric.edit"
                 },
                 {
@@ -92,8 +92,8 @@
                     "name":"constant.numeric.tree"
                 },
                 {
-                    "match":"\\b(Label|LabelWidth|Value|Type)\\b",
-                    "name":"constant.numeric.edititem"
+                    "match":"\\b(Label|LabelWidth|Value|Type|Accept|Range|Items|DefaultLabel|DefaultEdit|DefaultCheck|DefaultCombo|DefaultRange)\\b",
+                    "name":"constant.numeric.labeledit"
                 },
                 {
                     "match":"\\b(Image|ParticleCount|TimeStart|TimeEnd|Speed|SpeedVar|Life|LifeVar|Dir|DirVar|Size|SizeVar|Rot|RotVar|Mass|MassVar|Color|Source|Force|Emitter|Blend|Shape)\\b",
