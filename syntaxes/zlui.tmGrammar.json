@@ -32,7 +32,7 @@
         "object_type": {
             "patterns": [
                 {
-                    "match": "\\b(Win|Panel|Image|Button|Check|Combo|Edit|Slider|ImageText|TreeNode|Tree|LabelEdit|Particle|Spine)\\b",
+                    "match": "\\b(Win|Panel|Image|Button|Check|Combo|Edit|Slider|ImageText|TreeNode|Tree|LabelEdit|Particle|Spine|DatePicker)\\b",
                     "name": "variable.object_type"
                 }
             ]
@@ -40,7 +40,7 @@
         "global_function":{
             "patterns":[
                 {
-                    "match": "\\b(Font|include|DefaultBorderWidth|DefaultScreenSize|DefaultPanelColor|LoadPackImage|LoadImage|DefaultComboMenu|DefaultComboItem|MergeFont|CreateFont|ScaleMode|DefaultHintPanel)\\b",
+                    "match": "\\b(Font|include|load|DefaultBorderWidth|DefaultScreenSize|DefaultPanelColor|LoadPackImage|LoadImage|DefaultComboMenu|DefaultComboItem|MergeFont|CreateFont|ScaleMode|DefaultHintPanel)\\b",
                     "name": "variable.global_function"
                 }
             ]
@@ -94,6 +94,10 @@
                 {
                     "match":"\\b(Label|LabelWidth|Value|Type|Accept|Range|Items|DefaultLabel|DefaultEdit|DefaultCheck|DefaultCombo|DefaultRange)\\b",
                     "name":"constant.numeric.labeledit"
+                },
+                {
+                    "match":"\\b(Date)\\b",
+                    "name":"constant.numeric.datepicker"
                 },
                 {
                     "match":"\\b(Image|ParticleCount|TimeStart|TimeEnd|Speed|SpeedVar|Life|LifeVar|Dir|DirVar|Size|SizeVar|Rot|RotVar|Mass|MassVar|Color|Source|Force|Emitter|Blend|Shape)\\b",
@@ -171,6 +175,10 @@
                 {
                     "match": "\\b(acceler|push|gravity|twirl|rotate|wave|friction|spin|resize|point|rect|circle|speed)\\b",
                     "name": "keyword.control.particle"
+                },
+                {
+                    "match": "\\b(month_left|month_right|year_month)\\b",
+                    "name": "keyword.control.datepicker"
                 },
                 {
                     "match": "\\\\u([\\d\\w]{4})|\\\\s|\\\\n",

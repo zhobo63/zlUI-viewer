@@ -1,7 +1,7 @@
 import { ImGui,ImGui_Impl } from "@zhobo63/imgui-ts";
-import { Parser, ScaleMode, zlUIMgr } from "@zhobo63/zlui-ts";
-import { InspectorUI, BackendImGui } from "@zhobo63/zlui-ts/src/BackendImGui";
-import * as SPINE from "@zhobo63/zlui-ts-spine/src/zlUISpine";
+import * as SPINE from "./zlui-ts-spine/src/zlUISpine";
+import { Parser, ScaleMode, UIMgr } from "./zlui-ts/src/zlUI";
+import { BackendImGui, InspectorUI } from "./zlui-ts/src/BackendImGui";
 
 const vscode=acquireVsCodeApi();
 
@@ -19,7 +19,7 @@ export class App
 
     async initialize():Promise<any>
     {
-        this.ui=new zlUIMgr;
+        this.ui=new UIMgr;
         this.ui.backend=new BackendImGui(ImGui.GetBackgroundDrawList());
         SPINE.Renderer.Register(this.ui, "");
         this.ui.on_click=(obj)=>{
@@ -94,7 +94,7 @@ export class App
 
     isDirty:boolean=false;
     isInspector:boolean=false;
-    ui:zlUIMgr;
+    ui:UIMgr;
     w:number;
     h:number;
 };
