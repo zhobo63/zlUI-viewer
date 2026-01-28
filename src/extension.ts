@@ -4,16 +4,18 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 
-const version="0.1.52"
+import { version } from '../package.json';
+
+const Version=version;
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
-	console.log("zlui-viewer " + version + " is now active!");
+	console.log(`zlui-viewer ${Version} is now active!`);
 
 	let disposable = vscode.commands.registerCommand('zlui-viewer.show', () => {		
-		vscode.window.showInformationMessage('show zlUI-Viewer ' + version);
+		vscode.window.showInformationMessage(`show zlUI-Viewer ${Version}`);
 		UIPreviewPanel.show(context, undefined);
 	});
 

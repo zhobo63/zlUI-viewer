@@ -173,7 +173,7 @@
                     "name": "keyword.control.shape"
                 },
                 {
-                    "match": "\\b(acceler|push|gravity|twirl|rotate|wave|friction|spin|resize|point|rect|circle|speed)\\b",
+                    "match": "\\b(acceler|push|gravity|twirl|rotate|wave|friction|spin|resize|point|rect|circle|speed|rot|rotvar|rotating|rotatingvar)\\b",
                     "name": "keyword.control.particle"
                 },
                 {

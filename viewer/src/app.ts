@@ -1,7 +1,7 @@
 import { ImGui,ImGui_Impl } from "@zhobo63/imgui-ts";
-import * as SPINE from "./zlui-ts-spine/src/zlUISpine";
-import { Parser, ScaleMode, UIMgr } from "./zlui-ts/src/zlUI";
-import { BackendImGui, InspectorUI } from "./zlui-ts/src/BackendImGui";
+import * as SPINE from "@zhobo63/zlui-ts-spine/src/zlUISpine";
+import { Parser, ScaleMode, UIMgr, Version } from "@zhobo63/zlui-ts";
+import { BackendImGui, InspectorUI } from "@zhobo63/zlui-ts/src/BackendImGui";
 
 const vscode=acquireVsCodeApi();
 
@@ -54,6 +54,7 @@ export class App
         }
         if(this.isInspector) {
             ImGui.Begin("Inspector");            
+            ImGui.Text(`Version: ${Version}`);
             ImGui.Text("F2 show/hide Inspector");
             ImGui.Indent();
             ImGui.Text("Notify:" + (ui.notify?"["+ui.notify.line+"]"+ ui.notify.Name:""));
